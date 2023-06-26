@@ -1,0 +1,13 @@
+# ninja log v5
+1	190	1687630666259210569	pico_autogen/timestamp	662e374f588bacc5
+1	190	1687630666259210569	pico_autogen/mocs_compilation.cpp	662e374f588bacc5
+1	190	1687630666259210569	/home/jon/dev/pico/build-release/pico_autogen/timestamp	662e374f588bacc5
+1	190	1687630666259210569	/home/jon/dev/pico/build-release/pico_autogen/mocs_compilation.cpp	662e374f588bacc5
+190	1401	1687630667475970517	CMakeFiles/pico.dir/pico_autogen/mocs_compilation.cpp.o	43e961238d3cd13
+190	1403	1687630667479304106	CMakeFiles/pico.dir/src/main.cpp.o	310f7d0ca305b2a4
+3	22	1687630679773585929	pico_autogen/timestamp	662e374f588bacc5
+3	22	1687630679773585929	pico_autogen/mocs_compilation.cpp	662e374f588bacc5
+3	22	1687630679773585929	/home/jon/dev/pico/build-release/pico_autogen/timestamp	662e374f588bacc5
+3	22	1687630679773585929	/home/jon/dev/pico/build-release/pico_autogen/mocs_compilation.cpp	662e374f588bacc5
+24	1282	1687630681033683731	CMakeFiles/pico.dir/src/MainWindow.cpp.o	b219fb03396e6490
+1282	1498	1687630681243700048	/home/jon/dev/pico/bin/release/pico	ad684954520cbfbb
