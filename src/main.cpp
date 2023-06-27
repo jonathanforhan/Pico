@@ -10,8 +10,8 @@ main(int argc, char *argv[])
     QApplication::setOrganizationName("Pico");
     QApplication::setApplicationDisplayName("Pico");
 
-    MainWindow window;
-    window.showMaximized();
+    pico::MainWindow window;
+    window.show();
 
     return app.exec();
 }

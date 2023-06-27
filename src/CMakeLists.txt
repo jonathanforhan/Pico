@@ -11,6 +11,7 @@ file(GLOB MAIN "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 list(APPEND SOURCE_DIRS
     # place sub-dirs that will be added to executable
     editor
+    native
     )
 
 list(APPEND CMAKER_IGNORE

@@ -1,34 +1,27 @@
 #pragma once
 
-#include <QFile>
-#include <QFileSystemModel>
-#include <QHBoxLayout>
 #include <QMainWindow>
-#include <QPlainTextEdit>
-#include <QTextDocument>
-#include <QTextEdit>
-#include <QTreeView>
+
+#include "editor/Editor.hpp"
+
+namespace pico {
 
 class MainWindow : public QMainWindow
 {
+    Q_OBJECT
+
 public:
-    MainWindow(QMainWindow *parent = nullptr);
+    explicit MainWindow(QMainWindow *parent = nullptr);
     ~MainWindow() override;
 
-private slots:
-    bool
-    setTextBufferFromFile(const QString &filePath);
+    [[nodiscard]] bool
+    eventFilter(QObject *obj, QEvent *event) override;
 
 private:
-    QWidget *m_window;
-    QHBoxLayout *m_layout;
-    QFileSystemModel *m_model;
-    QTreeView *m_tree;
-    QTextEdit *m_textEdit;
-
     QSize
     sizeHint(void) const override;
 
-    void
-    setupSignals();
+    Editor *m_editor;
 };
+
+} // namespace pico

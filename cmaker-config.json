@@ -16,7 +16,7 @@
       "standard-required": true
     },
     "include-guards": "pragma",
-    "namespace": ""
+    "namespace": "pico"
   },
   "build": {
     "make": "Ninja",
