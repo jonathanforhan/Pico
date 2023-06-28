@@ -1,9 +1,14 @@
 #pragma once
 
 #include <QGridLayout>
+#include <QKeyEvent>
 #include <QTextEdit>
 
+#include "util/Util.hpp"
+
 namespace pico {
+
+class Editor;
 
 /**
  * Abstract class for Text, HTML, Markdown etc buffer to base themselves off
@@ -14,15 +19,18 @@ class Buffer : public QTextEdit
 
 public:
     explicit Buffer(QWidget *parent = nullptr)
-        : QTextEdit(parent)
+        : QTextEdit(parent),
+          m_children({}),
+          m_grid(nullptr)
     {}
 
-protected:
-    // TODO functions accessing the children
+signals:
+    void
+    modeChange(Mode mode);
 
 private:
-    QList<Buffer *> children;
-    QGridLayout *grid;
+    QList<Buffer *> m_children;
+    QGridLayout *m_grid;
 };
 
 } // namespace pico

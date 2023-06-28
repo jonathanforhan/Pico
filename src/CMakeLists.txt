@@ -12,6 +12,7 @@ list(APPEND SOURCE_DIRS
     # place sub-dirs that will be added to executable
     editor
     native
+    util
     )
 
 list(APPEND CMAKER_IGNORE

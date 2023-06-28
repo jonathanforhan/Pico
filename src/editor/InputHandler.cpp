@@ -2,73 +2,70 @@
 
 #include <QKeyEvent>
 
+#include "util/Util.hpp"
+
 #define QT_CUSTOM_HEX 0x01000000 /* Indicates a QT API enum (non unicode confilcting) */
-#define CALL(F) F()              /* provide cleaner call to callback */
 
 namespace pico {
 using namespace binding;
+using std::make_shared;
+
+/* Public */
 
 InputHandler::InputHandler(QObject *parent)
     : QObject(parent),
+      m_modifiers({}),
+      m_mode(Mode::Normal),
       m_keyMap(keymap_t{}),
       m_keyMapIndex(&m_keyMap)
 {}
 
 void
-InputHandler::handleKeyPress(Qt::Key key)
+InputHandler::handleKeyPress(key_t key)
 {
     // Handle modifiers (modifiers are very large ints)
     if (key & QT_CUSTOM_HEX) {
         switch (key) {
         case Qt::Key_Shift:
             m_modifiers.shift++;
-            break;
+            return;
         case Qt::Key_Control:
             m_modifiers.control++;
-            break;
+            return;
         case Qt::Key_Alt:
             m_modifiers.alt++;
-            break;
-        case Qt::Key_Left:
-            handleKeyPress(Qt::Key_H); // FIXME
-            break;
-        case Qt::Key_Down:
-            handleKeyPress(Qt::Key_J); // FIXME
-            break;
-        case Qt::Key_Up:
-            handleKeyPress(Qt::Key_K); // FIXME
-            break;
-        case Qt::Key_Right:
-            handleKeyPress(Qt::Key_L); // FIXME
-            break;
+            return;
         default:
-            m_keyMapIndex = &m_keyMap;
+            break;
         }
-        return;
     }
 
-    int mod = Mod::None;
-    mod |= Mod::Shift * !!m_modifiers.shift;
-    mod |= Mod::Control * !!m_modifiers.control;
-    mod |= Mod::Alt * !!m_modifiers.alt;
+    int mod = ModKey::None;
+    mod |= ModKey::Shift * !!m_modifiers.shift;
+    mod |= ModKey::Control * !!m_modifiers.control;
+    mod |= ModKey::Alt * !!m_modifiers.alt;
 
     /* if the macro is completed, call it, else if it's a chord
      * conituation, traverse it, else reset keyMapIndex */
-    auto entry = m_keyMapIndex->find(key | mod);
-    if (entry != m_keyMapIndex->end()) {
-        if (entry->second.second == true) {
-            CALL((*static_cast<callback_t *>(entry->second.first.get())));
-            m_keyMapIndex = &m_keyMap;
+    auto iter = m_keyMapIndex->find(key | mod | m_mode);
+
+    if (iter != m_keyMapIndex->end()) {
+        entry_t entry = iter->second;
+
+        if (entry.callable) {
+            auto func = *static_cast<callback_t *>(entry.link.get());
+            func();
+            resetMapIndex();
         } else {
-            m_keyMapIndex = static_cast<keymap_t *>(entry->second.first.get());
+            m_keyMapIndex = static_cast<keymap_t *>(entry.link.get());
         }
     } else {
-        m_keyMapIndex = &m_keyMap;
+        resetMapIndex();
     }
 }
 
 void
-InputHandler::handleKeyRelease(Qt::Key key)
+InputHandler::handleKeyRelease(key_t key)
 {
     if (key & QT_CUSTOM_HEX) {
         /* Alt behaves weirdly */
@@ -91,21 +88,24 @@ InputHandler::handleKeyRelease(Qt::Key key)
 }
 
 void
-InputHandler::addBinding(QList<key_t> keys, const callback_t &fn)
+InputHandler::addBinding(QList<key_t> keys, Mode mode, const callback_t &fn)
 {
     if (keys.isEmpty())
         return;
-
     Q_ASSERT(m_keyMapIndex = &m_keyMap);
 
     int i;
     for (i = 0; i < keys.size() - 1; i++) {
-        auto val = m_keyMapIndex->insert({ keys[i], { std::make_shared<keymap_t>(), false } });
-        m_keyMapIndex = static_cast<keymap_t *>(val.first->second.first.get());
+        key_t key = keys[i] | mode;
+        entry_t map_entry = { make_shared<keymap_t>(), false };
+        map_entry = m_keyMapIndex->emplace(key, std::move(map_entry)).first->second;
+        m_keyMapIndex = static_cast<keymap_t *>(map_entry.link.get());
     }
-    m_keyMapIndex->insert({ keys[i], { std::make_shared<callback_t>(std::move(fn)), true } });
+    key_t key = keys[i] | mode;
+    entry_t func_entry = { make_shared<callback_t>(std::move(fn)), true };
+    m_keyMapIndex->emplace(key, std::move(func_entry));
 
-    m_keyMapIndex = &m_keyMap;
+    resetMapIndex();
 }
 
 [[nodiscard]] bool
@@ -119,20 +119,40 @@ InputHandler::eventFilter(QObject *obj, QEvent *event)
             case Qt::Key_Shift:
             case Qt::Key_Control:
             case Qt::Key_Alt:
-                handleKeyRelease(static_cast<Qt::Key>(key));
+                handleKeyRelease(key);
                 return true;
             default:
                 return false;
             }
         }
         return false;
-    } else if (event->type() == QEvent::KeyPress) {
+    } else if (event->type() == QEvent::KeyPress && m_mode != Mode::Insert) {
         auto key = static_cast<QKeyEvent *>(event)->key();
-        handleKeyPress(static_cast<Qt::Key>(key));
+        handleKeyPress(key);
         return true;
     } else {
         return QObject::eventFilter(obj, event);
     }
+}
+
+void
+InputHandler::setMode(Mode mode)
+{
+    m_mode = mode;
+}
+
+Mode
+InputHandler::getMode(void)
+{
+    return m_mode;
+}
+
+/* Private */
+
+void
+InputHandler::resetMapIndex(void)
+{
+    m_keyMapIndex = &m_keyMap;
 }
 
 } // namespace pico

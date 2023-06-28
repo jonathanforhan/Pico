@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QKeyEvent>
+
 #include "editor/Buffer.hpp"
 
 namespace pico {
@@ -10,6 +12,9 @@ class TextBuffer : public Buffer
 
 public:
     explicit TextBuffer(QWidget *parent = nullptr);
+
+    void
+    keyPressEvent(QKeyEvent *event) override;
 
 private:
 };
