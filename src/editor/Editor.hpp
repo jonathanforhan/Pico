@@ -1,28 +1,37 @@
 #pragma once
 
-#include <QKeyEvent>
 #include <QWidget>
 
-#include "editor/Buffer.hpp"
-#include "editor/KeyInputHandler.hpp"
+#include "editor/InputHandler.hpp"
 
 namespace pico {
 
+/**
+ * Editor is the MainWindow's central widget,
+ * Editor is a singleton that in gotten through
+ * it's instance pointer
+ */
 class Editor : public QWidget
 {
     Q_OBJECT
 
-public:
+protected:
     explicit Editor(QWidget *parent = nullptr);
-    ~Editor() override;
+    static Editor *s_instance;
 
-    qint32
-    getCurrentBufferIndex();
+public:
+    Editor(const Editor &) = delete;
+    void
+    operator=(const Editor &) = delete;
+
+    static Editor *
+    getInstance(QWidget *w = nullptr);
+
+    const InputHandler *
+    getInputHandler();
 
 private:
-    QList<Buffer *> m_bufferList;
-    qint32 m_currentBufferIndex;
-    KeyInputHandler *m_keyInputHandler;
+    InputHandler *m_inputHandler;
 };
 
 } // namespace pico

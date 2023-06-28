@@ -1,18 +1,28 @@
 #pragma once
 
-#include <QTabWidget>
+#include <QGridLayout>
+#include <QTextEdit>
 
 namespace pico {
 
-class Buffer : public QTabWidget
+/**
+ * Abstract class for Text, HTML, Markdown etc buffer to base themselves off
+ */
+class Buffer : public QTextEdit
 {
     Q_OBJECT
 
 public:
-    explicit Buffer(QWidget *parent = nullptr);
+    explicit Buffer(QWidget *parent = nullptr)
+        : QTextEdit(parent)
+    {}
+
+protected:
+    // TODO functions accessing the children
 
 private:
-    QLayout *m_layout;
+    QList<Buffer *> children;
+    QGridLayout *grid;
 };
 
 } // namespace pico

@@ -1,57 +1,52 @@
 #include "Editor.hpp"
 
-#include <QHBoxLayout>
-#include <QKeyEvent>
-#include <QTextEdit>
-#include <memory>
+#include <QStackedLayout>
+
+#include "editor/TextBuffer.hpp"
 
 namespace pico {
 
+Editor *Editor::s_instance = nullptr;
+
 Editor::Editor(QWidget *parent)
     : QWidget(parent),
-      m_bufferList({}),
-      m_currentBufferIndex(-1),
-      m_keyInputHandler(new KeyInputHandler(this))
+      m_inputHandler(new InputHandler(this))
 {
-    this->installEventFilter((KeyEventFilter *)m_keyInputHandler->getKeyEventFilter());
+    auto stack = new QStackedLayout;
+    setLayout(stack);
+    stack->setSpacing(0);
+    stack->setContentsMargins(0, 0, 0, 0);
 
-    m_keyInputHandler->addBinding(
-        []() {
-            qDebug() << "H";
-        },
-        Qt::Key_H);
-    m_keyInputHandler->addBinding(
-        []() {
-            qDebug() << "<S-H>";
-        },
-        Qt::Key_H, KeyBind::Mod::Shift);
-    m_keyInputHandler->addBinding(
-        []() {
-            qDebug() << "<S-C-H>";
-        },
-        Qt::Key_H, KeyBind::Mod::Shift | KeyBind::Mod::Control);
-    m_keyInputHandler->addBinding(
-        []() {
-            qDebug() << "<S-C-M-H>";
-        },
-        Qt::Key_H, KeyBind::Mod::Shift | KeyBind::Mod::Control | KeyBind::Mod::Alt);
+    TextBuffer *textEdit = new TextBuffer(this);
+    textEdit->installEventFilter(m_inputHandler);
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    Buffer *b = new Buffer(this);
-    layout->addWidget(b);
+    TextBuffer *textEdit2 = new TextBuffer(this);
+    textEdit2->installEventFilter(m_inputHandler);
+
+    stack->addWidget(textEdit);
+    stack->addWidget(textEdit2);
+
+    m_inputHandler->addBinding({ Qt::Key_Space, Qt::Key_J, Qt::Key_K }, [=]() {
+        qDebug() << "Actually fucking works";
+    });
+
+    m_inputHandler->addBinding({ Qt::Key_S | binding::Mod::Shift | binding::Mod::Control }, [=]() {
+        qDebug() << "Saving Ctrl-Shft-S";
+    });
 }
 
-Editor::~Editor()
-{}
-
-// Public Functions
-
-qint32
-Editor::getCurrentBufferIndex()
+Editor *
+Editor::getInstance(QWidget *w)
 {
-    return m_currentBufferIndex;
+    if (s_instance == nullptr)
+        s_instance = new Editor(w);
+    return s_instance;
 }
 
-// Public Slots
+const InputHandler *
+Editor::getInputHandler()
+{
+    return m_inputHandler;
+}
 
 } // namespace pico
