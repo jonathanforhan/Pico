@@ -10,7 +10,7 @@ MainWindow::MainWindow(QMainWindow *parent)
       m_editor(Editor::getInstance(this))
 {
     this->setCentralWidget(m_editor);
-    installEventFilter((QObject *)m_editor->getInputHandler());
+    installEventFilter(m_editor->getInputHandler());
 }
 
 QSize

@@ -11,12 +11,13 @@ class TextBuffer : public Buffer
     Q_OBJECT
 
 public:
-    explicit TextBuffer(QWidget *parent = nullptr);
+    explicit TextBuffer(Editor *parent = nullptr);
 
-    void
-    keyPressEvent(QKeyEvent *event) override;
+    [[nodiscard]] bool
+    eventFilter(QObject *obj, QEvent *event) override;
 
 private:
+    Editor *m_editor;
 };
 
 } // namespace pico

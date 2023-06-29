@@ -19,6 +19,12 @@
 },
 {
   "directory": "/home/jon/dev/pico/build-debug",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/home/jon/dev/pico/build-debug/pico_autogen/include -I/home/jon/dev/pico/src -isystem /usr/include/qt6/QtCore -isystem /usr/include/qt6 -isystem /usr/lib/qt6/mkspecs/linux-g++ -isystem /usr/include/qt6/QtWidgets -isystem /usr/include/qt6/QtGui  -Wall -Wextra -Wpedantic -std=c++17 -g -std=gnu++17 -mno-direct-extern-access -o CMakeFiles/pico.dir/src/editor/BufferStack.cpp.o -c /home/jon/dev/pico/src/editor/BufferStack.cpp",
+  "file": "/home/jon/dev/pico/src/editor/BufferStack.cpp",
+  "output": "CMakeFiles/pico.dir/src/editor/BufferStack.cpp.o"
+},
+{
+  "directory": "/home/jon/dev/pico/build-debug",
   "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/home/jon/dev/pico/build-debug/pico_autogen/include -I/home/jon/dev/pico/src -isystem /usr/include/qt6/QtCore -isystem /usr/include/qt6 -isystem /usr/lib/qt6/mkspecs/linux-g++ -isystem /usr/include/qt6/QtWidgets -isystem /usr/include/qt6/QtGui  -Wall -Wextra -Wpedantic -std=c++17 -g -std=gnu++17 -mno-direct-extern-access -o CMakeFiles/pico.dir/src/editor/Editor.cpp.o -c /home/jon/dev/pico/src/editor/Editor.cpp",
   "file": "/home/jon/dev/pico/src/editor/Editor.cpp",
   "output": "CMakeFiles/pico.dir/src/editor/Editor.cpp.o"

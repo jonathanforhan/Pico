@@ -6,18 +6,24 @@
 
 namespace pico {
 
-TextBuffer::TextBuffer(QWidget *parent)
-    : Buffer(parent)
+TextBuffer::TextBuffer(Editor *parent)
+    : Buffer(parent),
+      m_editor(parent)
 {}
 
-void
-TextBuffer::keyPressEvent(QKeyEvent *event)
+[[nodiscard]] bool
+TextBuffer::eventFilter(QObject *obj, QEvent *event)
 {
-    auto e = Editor::getInstance();
-    if (event->key() == Qt::Key_Escape) {
-        modeChange(Mode::Normal);
-    } else if (e->getMode() == Mode::Insert) {
-        Buffer::keyPressEvent(event);
+    if (m_editor->getMode() == Mode::Insert) {
+        auto keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Escape) {
+            m_editor->setMode(Mode::Normal);
+        } else {
+            keyPressEvent(keyEvent);
+        }
+        return true;
+    } else {
+        return m_editor->getInputHandler()->eventFilter(obj, event);
     }
 }
 
