@@ -5,12 +5,15 @@
 
 namespace pico {
 
-Editor *Editor::s_instance = nullptr;
-
 Editor::Editor(QWidget *parent)
     : QWidget(parent),
       m_inputHandler(new InputHandler(this)),
-      m_bufferStack(new BufferStack(this))
+      m_bufferStack(new BufferStack(this)),
+      m_font("JetBrains Mono NF", 12)
+{}
+
+void
+Editor::Init(void)
 {
     setLayout(m_bufferStack);
     m_bufferStack->setSpacing(0);
@@ -54,9 +57,9 @@ Editor::Editor(QWidget *parent)
 Editor *
 Editor::getInstance(QWidget *parent)
 {
-    if (s_instance == nullptr)
-        s_instance = new Editor(parent);
-    return s_instance;
+    /* Generates instance on MainWindow creation */
+    static Editor *instance = new Editor(parent);
+    return instance;
 }
 
 InputHandler *
@@ -66,7 +69,7 @@ Editor::getInputHandler(void)
 }
 
 Mode
-Editor::getMode(void)
+Editor::getMode(void) const
 {
     return m_inputHandler->getMode();
 }
@@ -76,6 +79,18 @@ Editor::setMode(Mode mode)
 {
     m_inputHandler->setMode(mode);
     m_bufferStack->currentWidget()->setFocus();
+}
+
+const QFont &
+Editor::getFont(void) const
+{
+    return m_font;
+}
+
+void
+Editor::setFont(QFont &font)
+{
+    m_font = font;
 }
 
 } // namespace pico

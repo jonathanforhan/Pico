@@ -6,11 +6,10 @@
 namespace pico {
 
 MainWindow::MainWindow(QMainWindow *parent)
-    : QMainWindow(parent),
-      m_editor(Editor::getInstance(this))
+    : QMainWindow(parent)
 {
-    this->setCentralWidget(m_editor);
-    installEventFilter(m_editor->getInputHandler());
+    setCentralWidget(Editor::getInstance(this));
+    Editor::getInstance()->Init();
 }
 
 QSize

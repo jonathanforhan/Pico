@@ -13,7 +13,7 @@ void
 BufferStack::addWidget(Buffer *buffer)
 {
     buffer->installEventFilter(buffer);
-    buffer->setFont(QFont("JetBrains Mono NF", 12));
+    buffer->setFont(Editor::getInstance()->getFont());
     this->QStackedLayout::addWidget(buffer);
 }
 

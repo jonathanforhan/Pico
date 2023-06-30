@@ -16,8 +16,6 @@ public:
 private:
     QSize
     sizeHint(void) const override;
-
-    Editor *m_editor;
 };
 
 } // namespace pico
