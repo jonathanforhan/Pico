@@ -20,14 +20,23 @@ public:
     static Editor *
     getInstance(QWidget *parent = nullptr);
 
-    InputHandler *
-    getInputHandler(void) const;
+    void
+    forwardEventFilter(QWidget *widget);
 
     util::Mode
     getMode(void) const;
 
     void
     setMode(util::Mode mode);
+
+    bool
+    isShiftPressed(void);
+
+    bool
+    isControlPressed(void);
+
+    bool
+    isAltPressed(void);
 
 private:
     InputHandler *m_inputHandler;

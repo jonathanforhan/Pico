@@ -16,6 +16,8 @@ Editor::Editor(QWidget *parent)
 void
 Editor::Init(void) /* Init is an extension of the constructor see header */
 {
+    installEventFilter(m_inputHandler);
+
     setLayout(m_bufferStack);
     m_bufferStack->setSpacing(0);
     m_bufferStack->setContentsMargins(0, 0, 0, 0);
@@ -23,6 +25,18 @@ Editor::Init(void) /* Init is an extension of the constructor see header */
     Buffer *entryBuffer = new Buffer(this);
     m_bufferStack->addWidget(entryBuffer);
     entryBuffer->append("Welcome to Pico Editor");
+
+    m_inputHandler->addBinding({ Qt::Key_I }, util::Mode::Normal, [=]() {
+        setMode(util::Mode::Insert);
+    });
+
+    m_inputHandler->addBinding({ Qt::Key_Escape }, util::Mode::Insert, [=]() {
+        setMode(util::Mode::Normal);
+    });
+
+    m_inputHandler->addBinding({ Qt::Key_A }, util::Mode::Insert, [=]() {
+        ((Buffer *)m_bufferStack->currentWidget())->insertPlainText("a");
+    });
 
     m_inputHandler->addBinding({ Qt::CTRL | Qt::Key_H }, util::Mode::Normal, [=]() {
         int i = m_bufferStack->currentIndex();
@@ -45,14 +59,6 @@ Editor::Init(void) /* Init is an extension of the constructor see header */
     m_inputHandler->addBinding({ Qt::Key_Space, Qt::Key_B, Qt::Key_D }, util::Mode::Normal, [=]() {
         m_bufferStack->removeWidget(m_bufferStack->currentWidget());
     });
-
-    m_inputHandler->addBinding({ Qt::Key_I }, util::Mode::Normal, [=]() {
-        setMode(util::Mode::Insert);
-    });
-
-    m_inputHandler->addBinding({ Qt::Key_Escape }, util::Mode::Insert, [=]() {
-        setMode(util::Mode::Normal);
-    });
 }
 
 Editor *
@@ -67,23 +73,41 @@ Editor::getInstance(QWidget *parent)
     return instance;
 }
 
-InputHandler *
-Editor::getInputHandler(void) const
+void
+Editor::forwardEventFilter(QWidget *widget)
 {
-    return m_inputHandler;
+    widget->installEventFilter(m_inputHandler);
 }
 
-util::Mode
+inline util::Mode
 Editor::getMode(void) const
 {
-    return m_inputHandler->getMode();
+    return m_inputHandler->m_mode;
 }
 
-void
+inline void
 Editor::setMode(util::Mode mode)
 {
-    m_inputHandler->setMode(mode);
+    m_inputHandler->m_mode = mode;
     m_bufferStack->currentWidget()->setFocus();
+}
+
+inline bool
+Editor::isShiftPressed(void)
+{
+    return static_cast<bool>(m_inputHandler->m_modifiers.shift);
+}
+
+inline bool
+Editor::isControlPressed(void)
+{
+    return static_cast<bool>(m_inputHandler->m_modifiers.control);
+}
+
+inline bool
+Editor::isAltPressed(void)
+{
+    return static_cast<bool>(m_inputHandler->m_modifiers.alt);
 }
 
 } // namespace pico

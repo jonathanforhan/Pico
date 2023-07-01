@@ -4,7 +4,6 @@
 
 #include "util/Util.hpp"
 
-#define QT_CUSTOM_HEX 0x01000000 /* Indicates a QT API enum (non unicode confilcting) */
 #define GEN_KEY64(X, Y) (static_cast<qint64>(X) | (static_cast<qint64>(Y) << 32))
 
 namespace pico {
@@ -24,7 +23,7 @@ void
 InputHandler::handleKeyPress(key64_t key)
 {
     // Handle modifiers (modifiers are very large ints)
-    if (key & QT_CUSTOM_HEX) {
+    if (key & util::QT_CUSTOM_HEX) {
         switch (key) {
         case Qt::Key_Shift:
             m_modifiers.shift++;
@@ -40,9 +39,9 @@ InputHandler::handleKeyPress(key64_t key)
         }
     }
 
-    key |= Qt::SHIFT * !!m_modifiers.shift;
-    key |= Qt::CTRL * !!m_modifiers.control;
-    key |= Qt::ALT * !!m_modifiers.alt;
+    key |= Qt::SHIFT * static_cast<bool>(m_modifiers.shift);
+    key |= Qt::CTRL * static_cast<bool>(m_modifiers.control);
+    key |= Qt::ALT * static_cast<bool>(m_modifiers.alt);
 
     auto it = m_keyMapIndex->find(GEN_KEY64(key, m_mode));
 
@@ -62,7 +61,7 @@ InputHandler::handleKeyPress(key64_t key)
 void
 InputHandler::handleKeyRelease(key64_t key)
 {
-    if (key & QT_CUSTOM_HEX) {
+    if (key & util::QT_CUSTOM_HEX) {
         /* Alt behaves weirdly */
         switch (key) {
         case Qt::Key_Shift:
@@ -94,11 +93,19 @@ InputHandler::addBinding(QList<QKeyCombination> keys, util::Mode mode, const cal
     for (it_key = keys.begin(); it_key < keys.end() - 1; it_key++) {
         key = GEN_KEY64(it_key->toCombined(), mode);
         auto ret = m_keyMapIndex->emplace(key, new keymap_t).first;
+        if (ret->second.callable)
+            goto err;
         m_keyMapIndex = ret->second.next;
     }
     key = GEN_KEY64(it_key->toCombined(), mode);
+    if (m_keyMapIndex->find(key) != m_keyMapIndex->end())
+        goto err;
     m_keyMapIndex->emplace(key, callback_t{ std::move(fn) });
 
+    resetMapIndex();
+    return;
+err:
+    qWarning() << "Binding:" << keys << "failed due to confilcting key combinations";
     resetMapIndex();
 }
 
@@ -108,7 +115,7 @@ InputHandler::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::KeyRelease) {
         int key = static_cast<QKeyEvent *>(event)->key();
 
-        if (key & QT_CUSTOM_HEX) {
+        if (key & util::QT_CUSTOM_HEX) {
             switch (key) {
             case Qt::Key_Shift:
             case Qt::Key_Control:
@@ -120,25 +127,18 @@ InputHandler::eventFilter(QObject *obj, QEvent *event)
             }
         }
         return false;
-    } else if (event->type() == QEvent::KeyPress && m_mode != util::Mode::Insert) {
+    } else if (event->type() == QEvent::KeyPress) {
         int key = static_cast<QKeyEvent *>(event)->key();
-        handleKeyPress(static_cast<Qt::Key>(key));
+        if (m_mode != util::Mode::Insert)
+            handleKeyPress(static_cast<Qt::Key>(key));
+        else if (key == Qt::Key_Escape)
+            m_mode = util::Mode::Normal;
+        else
+            return false;
         return true;
     } else {
         return QObject::eventFilter(obj, event);
     }
-}
-
-void
-InputHandler::setMode(util::Mode mode)
-{
-    m_mode = mode;
-}
-
-util::Mode
-InputHandler::getMode(void)
-{
-    return m_mode;
 }
 
 /* Private */

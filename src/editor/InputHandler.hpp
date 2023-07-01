@@ -40,13 +40,18 @@ typedef struct value {
 
 } // namespace binding
 
+/**
+ * All access of InputHandler is done through the Editor
+ * friend class
+ */
 class InputHandler : public QObject
 {
     Q_OBJECT
 
-public:
+private:
     explicit InputHandler(QObject *parent = nullptr);
 
+public:
     void
     handleKeyPress(binding::key64_t key);
 
@@ -56,6 +61,7 @@ public:
     void
     addBinding(QList<QKeyCombination> keys, util::Mode mode, const binding::callback_t &fn);
 
+private:
     /* catches keyboard input, passes input it to
      * handleKey* functions if the event is a keypress
      * or forwards appropriate response */
@@ -63,15 +69,9 @@ public:
     eventFilter(QObject *obj, QEvent *event) override;
 
     void
-    setMode(util::Mode mode);
-
-    util::Mode
-    getMode(void);
-
-private:
-    void
     resetMapIndex(void);
 
+private:
     /* Tracks state of shift, control and alt */
     struct {
         unsigned shift : 2;
@@ -85,6 +85,9 @@ private:
     binding::keymap_t m_keyMap;
     /* tracks the key chord current state */
     binding::keymap_t *m_keyMapIndex;
+
+private:
+    friend class Editor;
 };
 
 } // namespace pico

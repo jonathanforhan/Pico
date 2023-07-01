@@ -12,9 +12,6 @@ class Buffer : public QTextEdit
 public:
     explicit Buffer(QWidget *parent = nullptr);
 
-    [[nodiscard]] bool
-    eventFilter(QObject *obj, QEvent *event) override;
-
 private:
     QList<Buffer *> m_children;
     QGridLayout *m_grid;
