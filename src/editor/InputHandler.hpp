@@ -1,7 +1,7 @@
 #pragma once
 
+#include <QKeyCombination>
 #include <QObject>
-#include <any>
 #include <functional>
 
 #include "util/Util.hpp"
@@ -10,13 +10,33 @@ namespace pico {
 
 namespace binding {
 
-typedef int key_t; /* key | modifiers */
-typedef struct {
-    std::shared_ptr<void> link; /* link to next map or function */
-    bool callable;              /* indicates if the entry is function */
-} entry_t;
-typedef std::unordered_map<key_t, entry_t> keymap_t;
+struct value;
+typedef qint64 key64_t;
+typedef std::unordered_map<key64_t, value> keymap_t;
 typedef std::function<void()> callback_t;
+typedef struct value {
+    value() = delete;
+    value(keymap_t *next)
+        : callable(false),
+          next(next)
+    {}
+    value(callback_t callback)
+        : callable(true),
+          callback(callback)
+    {}
+    ~value()
+    {
+        if (!this->callable)
+            delete next;
+    }
+
+    /* don't call next if callable is true and visa verse */
+    const bool callable; /* indicates if the entry is callback */
+    union {
+        keymap_t *const next;
+        const callback_t callback;
+    };
+} value_t;
 
 } // namespace binding
 
@@ -28,13 +48,13 @@ public:
     explicit InputHandler(QObject *parent = nullptr);
 
     void
-    handleKeyPress(key_t key);
+    handleKeyPress(binding::key64_t key);
 
     void
-    handleKeyRelease(key_t key);
+    handleKeyRelease(binding::key64_t key);
 
     void
-    addBinding(QList<key_t> keys, Mode mode, const binding::callback_t &fn);
+    addBinding(QList<QKeyCombination> keys, util::Mode mode, const binding::callback_t &fn);
 
     /* catches keyboard input, passes input it to
      * handleKey* functions if the event is a keypress
@@ -43,9 +63,9 @@ public:
     eventFilter(QObject *obj, QEvent *event) override;
 
     void
-    setMode(Mode mode);
+    setMode(util::Mode mode);
 
-    Mode
+    util::Mode
     getMode(void);
 
 private:
@@ -59,7 +79,7 @@ private:
         unsigned alt : 2;
     } m_modifiers;
 
-    Mode m_mode; /* Track mode state */
+    util::Mode m_mode; /* Track mode state */
 
     /* A map of infinite maps/functions used for key chords */
     binding::keymap_t m_keyMap;

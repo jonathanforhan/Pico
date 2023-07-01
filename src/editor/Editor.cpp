@@ -1,6 +1,6 @@
 #include "Editor.hpp"
 
-#include "editor/TextBuffer.hpp"
+#include "editor/Buffer.hpp"
 #include "util/Util.hpp"
 
 namespace pico {
@@ -8,89 +8,82 @@ namespace pico {
 Editor::Editor(QWidget *parent)
     : QWidget(parent),
       m_inputHandler(new InputHandler(this)),
-      m_bufferStack(new BufferStack(this)),
-      m_font("JetBrains Mono NF", 12)
-{}
+      m_bufferStack(new QStackedLayout(this))
+{
+    setFont({ "JetBrains Mono NF", 12 });
+}
 
 void
-Editor::Init(void)
+Editor::Init(void) /* Init is an extension of the constructor see header */
 {
     setLayout(m_bufferStack);
     m_bufferStack->setSpacing(0);
     m_bufferStack->setContentsMargins(0, 0, 0, 0);
 
-    TextBuffer *entryBuffer = new TextBuffer(this);
+    Buffer *entryBuffer = new Buffer(this);
     m_bufferStack->addWidget(entryBuffer);
     entryBuffer->append("Welcome to Pico Editor");
 
-    m_inputHandler->addBinding({ Key::H | ModKey::Control }, Mode::Normal, [=]() {
+    m_inputHandler->addBinding({ Qt::CTRL | Qt::Key_H }, util::Mode::Normal, [=]() {
         int i = m_bufferStack->currentIndex();
         i = i == 0 ? m_bufferStack->count() - 1 : i - 1;
         m_bufferStack->setCurrentIndex(i);
     });
 
-    m_inputHandler->addBinding({ Key::L | ModKey::Control }, Mode::Normal, [=]() {
+    m_inputHandler->addBinding({ Qt::CTRL | Qt::Key_L }, util::Mode::Normal, [=]() {
         int i = m_bufferStack->currentIndex();
         i = i == m_bufferStack->count() - 1 ? 0 : i + 1;
         m_bufferStack->setCurrentIndex(i);
     });
 
-    m_inputHandler->addBinding({ Key::Space, Key::B, Key::N }, Mode::Normal, [=]() {
-        auto edit = new TextBuffer(this);
+    m_inputHandler->addBinding({ Qt::Key_Space, Qt::Key_B, Qt::Key_N }, util::Mode::Normal, [=]() {
+        auto edit = new Buffer(this);
         m_bufferStack->addWidget(edit);
         m_bufferStack->setCurrentWidget(edit);
     });
 
-    m_inputHandler->addBinding({ Key::Space, Key::B, Key::D }, Mode::Normal, [=]() {
+    m_inputHandler->addBinding({ Qt::Key_Space, Qt::Key_B, Qt::Key_D }, util::Mode::Normal, [=]() {
         m_bufferStack->removeWidget(m_bufferStack->currentWidget());
     });
 
-    m_inputHandler->addBinding({ Key::I }, Mode::Normal, [=]() {
-        setMode(Mode::Insert);
+    m_inputHandler->addBinding({ Qt::Key_I }, util::Mode::Normal, [=]() {
+        setMode(util::Mode::Insert);
     });
 
-    m_inputHandler->addBinding({ Qt::Key_Escape }, Mode::Insert, [=]() {
-        setMode(Mode::Normal);
+    m_inputHandler->addBinding({ Qt::Key_Escape }, util::Mode::Insert, [=]() {
+        setMode(util::Mode::Normal);
     });
 }
 
 Editor *
 Editor::getInstance(QWidget *parent)
 {
+    static Editor *instance = nullptr;
     /* Generates instance on MainWindow creation */
-    static Editor *instance = new Editor(parent);
+    if (instance == nullptr) {
+        instance = new Editor(parent);
+        instance->Init();
+    }
     return instance;
 }
 
 InputHandler *
-Editor::getInputHandler(void)
+Editor::getInputHandler(void) const
 {
     return m_inputHandler;
 }
 
-Mode
+util::Mode
 Editor::getMode(void) const
 {
     return m_inputHandler->getMode();
 }
 
 void
-Editor::setMode(Mode mode)
+Editor::setMode(util::Mode mode)
 {
     m_inputHandler->setMode(mode);
     m_bufferStack->currentWidget()->setFocus();
-}
-
-const QFont &
-Editor::getFont(void) const
-{
-    return m_font;
-}
-
-void
-Editor::setFont(QFont &font)
-{
-    m_font = font;
 }
 
 } // namespace pico

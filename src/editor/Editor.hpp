@@ -1,8 +1,8 @@
 #pragma once
 
+#include <QStackedLayout>
 #include <QWidget>
 
-#include "editor/BufferStack.hpp"
 #include "editor/InputHandler.hpp"
 
 namespace pico {
@@ -21,39 +21,29 @@ public:
     getInstance(QWidget *parent = nullptr);
 
     InputHandler *
-    getInputHandler(void);
+    getInputHandler(void) const;
 
-    Mode
+    util::Mode
     getMode(void) const;
 
     void
-    setMode(Mode mode);
-
-    const QFont &
-    getFont(void) const;
-
-    void
-    setFont(QFont &font);
+    setMode(util::Mode mode);
 
 private:
     InputHandler *m_inputHandler;
-    BufferStack *m_bufferStack;
+    QStackedLayout *m_bufferStack;
 
-    /* Editor Settings */
-    QFont m_font;
-
-    /* Singleton implementation */
-private:
+private: /* Singleton implementation */
     explicit Editor(QWidget *parent = nullptr);
-
-    Editor(const Editor &) = delete;
-    void
-    operator=(const Editor &) = delete;
-    /* Init must be done after constructor in the MainWindow so
-     * the instance is created (construct depends on ::getInstance) */
+    /* Init must be done after constructor
+     * to ensure no data races */
     void
     Init(void);
-    friend class MainWindow;
+
+    Editor(const Editor &) = delete;
+
+    void
+    operator=(const Editor &) = delete;
 };
 
 } // namespace pico

@@ -9,7 +9,6 @@ MainWindow::MainWindow(QMainWindow *parent)
     : QMainWindow(parent)
 {
     setCentralWidget(Editor::getInstance(this));
-    Editor::getInstance()->Init();
 }
 
 QSize

@@ -5,23 +5,23 @@
 #include "util/Util.hpp"
 
 #define QT_CUSTOM_HEX 0x01000000 /* Indicates a QT API enum (non unicode confilcting) */
+#define GEN_KEY64(X, Y) (static_cast<qint64>(X) | (static_cast<qint64>(Y) << 32))
 
 namespace pico {
 using namespace binding;
-using std::make_shared;
 
 /* Public */
 
 InputHandler::InputHandler(QObject *parent)
     : QObject(parent),
       m_modifiers({}),
-      m_mode(Mode::Normal),
+      m_mode(util::Mode::Normal),
       m_keyMap(keymap_t{}),
       m_keyMapIndex(&m_keyMap)
 {}
 
 void
-InputHandler::handleKeyPress(key_t key)
+InputHandler::handleKeyPress(key64_t key)
 {
     // Handle modifiers (modifiers are very large ints)
     if (key & QT_CUSTOM_HEX) {
@@ -40,24 +40,19 @@ InputHandler::handleKeyPress(key_t key)
         }
     }
 
-    int mod = ModKey::None;
-    mod |= ModKey::Shift * !!m_modifiers.shift;
-    mod |= ModKey::Control * !!m_modifiers.control;
-    mod |= ModKey::Alt * !!m_modifiers.alt;
+    key |= Qt::SHIFT * !!m_modifiers.shift;
+    key |= Qt::CTRL * !!m_modifiers.control;
+    key |= Qt::ALT * !!m_modifiers.alt;
 
-    /* if the macro is completed, call it, else if it's a chord
-     * conituation, traverse it, else reset keyMapIndex */
-    auto iter = m_keyMapIndex->find(key | mod | m_mode);
+    auto it = m_keyMapIndex->find(GEN_KEY64(key, m_mode));
 
-    if (iter != m_keyMapIndex->end()) {
-        entry_t entry = iter->second;
-
-        if (entry.callable) {
-            auto func = *static_cast<callback_t *>(entry.link.get());
-            func();
+    if (it != m_keyMapIndex->end()) {
+        value_t &val = it->second;
+        if (val.callable) {
+            val.callback();
             resetMapIndex();
         } else {
-            m_keyMapIndex = static_cast<keymap_t *>(entry.link.get());
+            m_keyMapIndex = val.next;
         }
     } else {
         resetMapIndex();
@@ -65,7 +60,7 @@ InputHandler::handleKeyPress(key_t key)
 }
 
 void
-InputHandler::handleKeyRelease(key_t key)
+InputHandler::handleKeyRelease(key64_t key)
 {
     if (key & QT_CUSTOM_HEX) {
         /* Alt behaves weirdly */
@@ -88,22 +83,21 @@ InputHandler::handleKeyRelease(key_t key)
 }
 
 void
-InputHandler::addBinding(QList<key_t> keys, Mode mode, const callback_t &fn)
+InputHandler::addBinding(QList<QKeyCombination> keys, util::Mode mode, const callback_t &fn)
 {
     if (keys.isEmpty())
         return;
     Q_ASSERT(m_keyMapIndex = &m_keyMap);
 
-    int i;
-    for (i = 0; i < keys.size() - 1; i++) {
-        key_t key = keys[i] | mode;
-        entry_t map_entry = { make_shared<keymap_t>(), false };
-        map_entry = m_keyMapIndex->emplace(key, std::move(map_entry)).first->second;
-        m_keyMapIndex = static_cast<keymap_t *>(map_entry.link.get());
+    binding::key64_t key;
+    QList<QKeyCombination>::iterator it_key;
+    for (it_key = keys.begin(); it_key < keys.end() - 1; it_key++) {
+        key = GEN_KEY64(it_key->toCombined(), mode);
+        auto ret = m_keyMapIndex->emplace(key, new keymap_t).first;
+        m_keyMapIndex = ret->second.next;
     }
-    key_t key = keys[i] | mode;
-    entry_t func_entry = { make_shared<callback_t>(std::move(fn)), true };
-    m_keyMapIndex->emplace(key, std::move(func_entry));
+    key = GEN_KEY64(it_key->toCombined(), mode);
+    m_keyMapIndex->emplace(key, callback_t{ std::move(fn) });
 
     resetMapIndex();
 }
@@ -112,23 +106,23 @@ InputHandler::addBinding(QList<key_t> keys, Mode mode, const callback_t &fn)
 InputHandler::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyRelease) {
-        auto key = static_cast<QKeyEvent *>(event)->key();
+        int key = static_cast<QKeyEvent *>(event)->key();
 
         if (key & QT_CUSTOM_HEX) {
             switch (key) {
             case Qt::Key_Shift:
             case Qt::Key_Control:
             case Qt::Key_Alt:
-                handleKeyRelease(key);
+                handleKeyRelease(static_cast<Qt::Key>(key));
                 return true;
             default:
                 return false;
             }
         }
         return false;
-    } else if (event->type() == QEvent::KeyPress && m_mode != Mode::Insert) {
-        auto key = static_cast<QKeyEvent *>(event)->key();
-        handleKeyPress(key);
+    } else if (event->type() == QEvent::KeyPress && m_mode != util::Mode::Insert) {
+        int key = static_cast<QKeyEvent *>(event)->key();
+        handleKeyPress(static_cast<Qt::Key>(key));
         return true;
     } else {
         return QObject::eventFilter(obj, event);
@@ -136,12 +130,12 @@ InputHandler::eventFilter(QObject *obj, QEvent *event)
 }
 
 void
-InputHandler::setMode(Mode mode)
+InputHandler::setMode(util::Mode mode)
 {
     m_mode = mode;
 }
 
-Mode
+util::Mode
 InputHandler::getMode(void)
 {
     return m_mode;
