@@ -1,5 +1,7 @@
 #include "Editor.hpp"
 
+#include "MainWindow.hpp"
+#include "editor/TextEdit.hpp"
 #include "util/Util.hpp"
 
 namespace pico {
@@ -9,40 +11,68 @@ Editor::Editor(QWidget *parent)
       m_inputHandler(new InputHandler(this)),
       m_bufferStack(new QStackedLayout(this))
 {
-    setFont({ "JetBrains Mono NF", 12 });
+    auto font = QFont{ "JetBrains Mono NF" };
+    font.setPixelSize(15);
+    setFont(font);
 }
 
 void
 Editor::Init(void) /* Init is an extension of the constructor see header */
 {
-    installEventFilter(m_inputHandler);
-
-    setLayout(m_bufferStack);
+    using namespace Qt;
+    using namespace util;
     m_bufferStack->setSpacing(0);
     m_bufferStack->setContentsMargins(0, 0, 0, 0);
 
-    Buffer *entryBuffer = new Buffer(this);
-    m_bufferStack->addWidget(entryBuffer);
-    entryBuffer->setPlaceholderText("Welcome to Pico Editor");
-
-    m_inputHandler->addBinding({ Qt::Key_I }, util::Mode::Normal, [=]() {
-        setMode(util::Mode::Insert);
+    connect(m_bufferStack, &QStackedLayout::currentChanged, [=]() {
+        ((Buffer *)m_bufferStack->currentWidget())->updateDocks();
     });
 
-    m_inputHandler->addBinding({ Qt::CTRL | Qt::Key_H }, util::Mode::Normal, [=]() {
+    addBuffer(new Buffer(this));
+
+    addBinding({ Key_I }, Mode::Normal, [=]() {
+        setMode(Mode::Insert);
+    });
+
+    addBinding({ Key_H }, Mode::Normal, [=]() {
+        // TODO better way to access buffer children
+        TextEdit *edit = static_cast<TextEdit *>(getCurrentBuffer()->getChildAtPosition(0, 0));
+        edit->moveCursor(QTextCursor::MoveOperation::Left);
+    });
+
+    addBinding({ Key_J }, Mode::Normal, [=]() {
+        TextEdit *edit = static_cast<TextEdit *>(getCurrentBuffer()->getChildAtPosition(0, 0));
+        edit->moveCursor(QTextCursor::MoveOperation::Down);
+    });
+
+    addBinding({ Key_K }, Mode::Normal, [=]() {
+        TextEdit *edit = static_cast<TextEdit *>(getCurrentBuffer()->getChildAtPosition(0, 0));
+        edit->moveCursor(QTextCursor::MoveOperation::Up);
+    });
+
+    addBinding({ Key_L }, Mode::Normal, [=]() {
+        TextEdit *edit = static_cast<TextEdit *>(getCurrentBuffer()->getChildAtPosition(0, 0));
+        edit->moveCursor(QTextCursor::MoveOperation::Right);
+    });
+
+    addBinding({ CTRL | Key_H }, Mode::Normal, [=]() {
         prevBuffer();
     });
 
-    m_inputHandler->addBinding({ Qt::CTRL | Qt::Key_L }, util::Mode::Normal, [=]() {
+    addBinding({ CTRL | Key_L }, Mode::Normal, [=]() {
         nextBuffer();
     });
 
-    m_inputHandler->addBinding({ Qt::Key_Space, Qt::Key_B, Qt::Key_N }, util::Mode::Normal, [=]() {
+    addBinding({ Key_Space, Key_B, Key_N }, Mode::Normal, [=]() {
         addBuffer(new Buffer(this));
     });
 
-    m_inputHandler->addBinding({ Qt::Key_Space, Qt::Key_B, Qt::Key_D }, util::Mode::Normal, [=]() {
+    addBinding({ Key_Space, Key_B, Key_D }, Mode::Normal, [=]() {
         removeBuffer(getCurrentBuffer());
+    });
+
+    addBinding({ Key_Space, Key_E }, Mode::Normal, [=]() {
+        getCurrentBuffer()->toggleDock(Qt::DockWidgetArea::LeftDockWidgetArea);
     });
 }
 
@@ -58,44 +88,55 @@ Editor::getInstance(QWidget *parent)
     return instance;
 }
 
+MainWindow *
+Editor::getMainWindow(void)
+{
+    return static_cast<MainWindow *>(parent());
+}
+
 void
 Editor::forwardEventFilter(QWidget *widget)
 {
     widget->installEventFilter(m_inputHandler);
 }
 
+inline void
+Editor::addBinding(QList<QKeyCombination> keys, util::Mode mode, const std::function<void()> &fn)
+{
+    m_inputHandler->addBinding(keys, mode, fn);
+}
+
 util::Mode
-Editor::getMode(void) const
+Editor::mode(void) const
 {
     return m_inputHandler->m_mode;
 }
 
-void
+inline void
 Editor::setMode(util::Mode mode)
 {
     m_inputHandler->setMode(mode);
-    m_bufferStack->currentWidget()->setFocus();
 }
 
-bool
+inline bool
 Editor::isShiftPressed(void)
 {
     return static_cast<bool>(m_inputHandler->m_modifiers.shift);
 }
 
-bool
+inline bool
 Editor::isControlPressed(void)
 {
     return static_cast<bool>(m_inputHandler->m_modifiers.control);
 }
 
-bool
+inline bool
 Editor::isAltPressed(void)
 {
     return static_cast<bool>(m_inputHandler->m_modifiers.alt);
 }
 
-void
+inline void
 Editor::nextBuffer(void)
 {
     auto i = m_bufferStack->currentIndex();
@@ -103,7 +144,7 @@ Editor::nextBuffer(void)
     m_bufferStack->setCurrentIndex(i);
 }
 
-void
+inline void
 Editor::prevBuffer(void)
 {
     auto i = m_bufferStack->currentIndex();
@@ -111,7 +152,7 @@ Editor::prevBuffer(void)
     m_bufferStack->setCurrentIndex(i);
 }
 
-void
+inline void
 Editor::nthBuffer(qsizetype i)
 {
     if (i < 0 || i <= m_bufferStack->count())
@@ -119,20 +160,20 @@ Editor::nthBuffer(qsizetype i)
     m_bufferStack->setCurrentIndex(i);
 }
 
-Buffer *
+inline Buffer *
 Editor::getCurrentBuffer(void)
 {
     return static_cast<Buffer *>(m_bufferStack->currentWidget());
 }
 
-void
+inline void
 Editor::addBuffer(Buffer *buffer)
 {
     m_bufferStack->addWidget(buffer);
     m_bufferStack->setCurrentWidget(buffer);
 }
 
-void
+inline void
 Editor::removeBuffer(Buffer *buffer)
 {
     m_bufferStack->removeWidget(buffer);

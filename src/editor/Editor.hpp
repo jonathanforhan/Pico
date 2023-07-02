@@ -3,6 +3,7 @@
 #include <QStackedLayout>
 #include <QWidget>
 
+#include "MainWindow.hpp"
 #include "editor/Buffer.hpp"
 #include "editor/InputHandler.hpp"
 
@@ -21,40 +22,46 @@ public:
     static Editor *
     getInstance(QWidget *parent = nullptr);
 
+    MainWindow *
+    getMainWindow(void);
+
     void
     forwardEventFilter(QWidget *widget);
 
-    util::Mode
-    getMode(void) const;
+    inline void
+    addBinding(QList<QKeyCombination> keys, util::Mode mode, const std::function<void()> &fn);
 
-    void
+    util::Mode
+    mode(void) const;
+
+    inline void
     setMode(util::Mode mode);
 
-    bool
+    inline bool
     isShiftPressed(void);
 
-    bool
+    inline bool
     isControlPressed(void);
 
-    bool
+    inline bool
     isAltPressed(void);
 
-    void
+    inline void
     nextBuffer(void);
 
-    void
+    inline void
     prevBuffer(void);
 
-    void
+    inline void
     nthBuffer(qsizetype i);
 
-    Buffer *
+    inline Buffer *
     getCurrentBuffer(void);
 
-    void
+    inline void
     addBuffer(Buffer *buffer);
 
-    void
+    inline void
     removeBuffer(Buffer *buffer);
 
 private:
@@ -62,7 +69,8 @@ private:
     QStackedLayout *m_bufferStack;
 
 private: /* Singleton implementation */
-    explicit Editor(QWidget *parent = nullptr);
+    Q_INVOKABLE
+    Editor(QWidget *parent = nullptr);
     /* Init must be done after constructor
      * to ensure no data races */
     void

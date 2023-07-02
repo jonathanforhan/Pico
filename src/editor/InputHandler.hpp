@@ -17,6 +17,7 @@ class InputHandler final : public QObject
     Q_OBJECT
 
 private:
+    /* Type declarations */
     struct value;
     typedef qint64 key64_t;
     typedef std::unordered_map<key64_t, value> keymap_t;
@@ -67,7 +68,7 @@ private:
     void
     setMode(util::Mode mode);
 
-    void
+    inline void
     resetMapIndex(void);
 
 private:

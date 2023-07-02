@@ -107,6 +107,7 @@ err:
     resetMapIndex();
 }
 
+/* Passively monitor */
 [[nodiscard]] bool
 InputHandler::eventFilter(QObject *obj, QEvent *event)
 {
@@ -130,12 +131,17 @@ InputHandler::eventFilter(QObject *obj, QEvent *event)
         if (m_mode != util::Mode::Insert || key == Qt::Key_Control || key == Qt::Key_Alt ||
             key == Qt::Key_Shift || m_modifiers.control || m_modifiers.alt) {
             handleKeyPress(static_cast<Qt::Key>(key));
+            if (m_keyMapIndex == &m_keyMap)
+                return false;
+            else
+                return true;
         } else if (key == Qt::Key_Escape) {
             setMode(util::Mode::Normal);
+            return true;
         } else {
             return false;
         }
-        return true;
+        return false;
     } else {
         return QObject::eventFilter(obj, event);
     }
