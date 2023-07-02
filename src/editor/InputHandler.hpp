@@ -69,6 +69,9 @@ private:
     eventFilter(QObject *obj, QEvent *event) override;
 
     void
+    setMode(util::Mode mode);
+
+    void
     resetMapIndex(void);
 
 private:

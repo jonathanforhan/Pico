@@ -1,6 +1,5 @@
 #include "Editor.hpp"
 
-#include "editor/Buffer.hpp"
 #include "util/Util.hpp"
 
 namespace pico {
@@ -24,40 +23,26 @@ Editor::Init(void) /* Init is an extension of the constructor see header */
 
     Buffer *entryBuffer = new Buffer(this);
     m_bufferStack->addWidget(entryBuffer);
-    entryBuffer->append("Welcome to Pico Editor");
+    entryBuffer->setPlaceholderText("Welcome to Pico Editor");
 
     m_inputHandler->addBinding({ Qt::Key_I }, util::Mode::Normal, [=]() {
         setMode(util::Mode::Insert);
     });
 
-    m_inputHandler->addBinding({ Qt::Key_Escape }, util::Mode::Insert, [=]() {
-        setMode(util::Mode::Normal);
-    });
-
-    m_inputHandler->addBinding({ Qt::Key_A }, util::Mode::Insert, [=]() {
-        ((Buffer *)m_bufferStack->currentWidget())->insertPlainText("a");
-    });
-
     m_inputHandler->addBinding({ Qt::CTRL | Qt::Key_H }, util::Mode::Normal, [=]() {
-        int i = m_bufferStack->currentIndex();
-        i = i == 0 ? m_bufferStack->count() - 1 : i - 1;
-        m_bufferStack->setCurrentIndex(i);
+        prevBuffer();
     });
 
     m_inputHandler->addBinding({ Qt::CTRL | Qt::Key_L }, util::Mode::Normal, [=]() {
-        int i = m_bufferStack->currentIndex();
-        i = i == m_bufferStack->count() - 1 ? 0 : i + 1;
-        m_bufferStack->setCurrentIndex(i);
+        nextBuffer();
     });
 
     m_inputHandler->addBinding({ Qt::Key_Space, Qt::Key_B, Qt::Key_N }, util::Mode::Normal, [=]() {
-        auto edit = new Buffer(this);
-        m_bufferStack->addWidget(edit);
-        m_bufferStack->setCurrentWidget(edit);
+        addBuffer(new Buffer(this));
     });
 
     m_inputHandler->addBinding({ Qt::Key_Space, Qt::Key_B, Qt::Key_D }, util::Mode::Normal, [=]() {
-        m_bufferStack->removeWidget(m_bufferStack->currentWidget());
+        removeBuffer(getCurrentBuffer());
     });
 }
 
@@ -79,35 +64,78 @@ Editor::forwardEventFilter(QWidget *widget)
     widget->installEventFilter(m_inputHandler);
 }
 
-inline util::Mode
+util::Mode
 Editor::getMode(void) const
 {
     return m_inputHandler->m_mode;
 }
 
-inline void
+void
 Editor::setMode(util::Mode mode)
 {
-    m_inputHandler->m_mode = mode;
+    m_inputHandler->setMode(mode);
     m_bufferStack->currentWidget()->setFocus();
 }
 
-inline bool
+bool
 Editor::isShiftPressed(void)
 {
     return static_cast<bool>(m_inputHandler->m_modifiers.shift);
 }
 
-inline bool
+bool
 Editor::isControlPressed(void)
 {
     return static_cast<bool>(m_inputHandler->m_modifiers.control);
 }
 
-inline bool
+bool
 Editor::isAltPressed(void)
 {
     return static_cast<bool>(m_inputHandler->m_modifiers.alt);
+}
+
+void
+Editor::nextBuffer(void)
+{
+    auto i = m_bufferStack->currentIndex();
+    i = i == m_bufferStack->count() - 1 ? 0 : i + 1;
+    m_bufferStack->setCurrentIndex(i);
+}
+
+void
+Editor::prevBuffer(void)
+{
+    auto i = m_bufferStack->currentIndex();
+    i = i == 0 ? m_bufferStack->count() - 1 : i - 1;
+    m_bufferStack->setCurrentIndex(i);
+}
+
+void
+Editor::nthBuffer(qsizetype i)
+{
+    if (i < 0 || i <= m_bufferStack->count())
+        return;
+    m_bufferStack->setCurrentIndex(i);
+}
+
+Buffer *
+Editor::getCurrentBuffer(void)
+{
+    return static_cast<Buffer *>(m_bufferStack->currentWidget());
+}
+
+void
+Editor::addBuffer(Buffer *buffer)
+{
+    m_bufferStack->addWidget(buffer);
+    m_bufferStack->setCurrentWidget(buffer);
+}
+
+void
+Editor::removeBuffer(Buffer *buffer)
+{
+    m_bufferStack->removeWidget(buffer);
 }
 
 } // namespace pico

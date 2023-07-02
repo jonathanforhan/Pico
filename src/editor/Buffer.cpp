@@ -15,6 +15,19 @@ Buffer::Buffer(QWidget *parent)
     Editor *editor = Editor::getInstance();
     editor->forwardEventFilter(this);
     setFont(Editor::getInstance()->font());
+    insertPlainText("Foo bar");
+}
+
+void
+Buffer::keyPressEvent(QKeyEvent *event)
+{
+    /* Prevent hightlighting with SHFT+ARROW */
+    event->setModifiers(Qt::KeyboardModifier::NoModifier);
+    if (event->key() == Qt::Key_Tab) {
+        insertPlainText("    ");
+        return;
+    }
+    this->QTextEdit::keyPressEvent(event);
 }
 
 } // namespace pico

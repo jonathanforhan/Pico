@@ -51,6 +51,7 @@ InputHandler::handleKeyPress(key64_t key)
             val.callback();
             resetMapIndex();
         } else {
+            /* traverse the keymap-tree */
             m_keyMapIndex = val.next;
         }
     } else {
@@ -109,6 +110,8 @@ err:
     resetMapIndex();
 }
 
+/* Private */
+
 [[nodiscard]] bool
 InputHandler::eventFilter(QObject *obj, QEvent *event)
 {
@@ -129,21 +132,28 @@ InputHandler::eventFilter(QObject *obj, QEvent *event)
         return false;
     } else if (event->type() == QEvent::KeyPress) {
         int key = static_cast<QKeyEvent *>(event)->key();
-        if (m_mode != util::Mode::Insert)
+        if (m_mode != util::Mode::Insert || key == Qt::Key_Control || key == Qt::Key_Alt ||
+            key == Qt::Key_Shift || m_modifiers.control || m_modifiers.alt) {
             handleKeyPress(static_cast<Qt::Key>(key));
-        else if (key == Qt::Key_Escape)
-            m_mode = util::Mode::Normal;
-        else
+        } else if (key == Qt::Key_Escape) {
+            setMode(util::Mode::Normal);
+        } else {
             return false;
+        }
         return true;
     } else {
         return QObject::eventFilter(obj, event);
     }
 }
 
-/* Private */
-
 void
+InputHandler::setMode(util::Mode mode)
+{
+    m_mode = mode;
+    resetMapIndex();
+}
+
+inline void
 InputHandler::resetMapIndex(void)
 {
     m_keyMapIndex = &m_keyMap;

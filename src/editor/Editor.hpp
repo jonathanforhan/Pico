@@ -3,6 +3,7 @@
 #include <QStackedLayout>
 #include <QWidget>
 
+#include "editor/Buffer.hpp"
 #include "editor/InputHandler.hpp"
 
 namespace pico {
@@ -37,6 +38,24 @@ public:
 
     bool
     isAltPressed(void);
+
+    void
+    nextBuffer(void);
+
+    void
+    prevBuffer(void);
+
+    void
+    nthBuffer(qsizetype i);
+
+    Buffer *
+    getCurrentBuffer(void);
+
+    void
+    addBuffer(Buffer *buffer);
+
+    void
+    removeBuffer(Buffer *buffer);
 
 private:
     InputHandler *m_inputHandler;

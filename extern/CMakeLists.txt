@@ -10,16 +10,18 @@ set(CMAKE_AUTORCC ON)
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
     Widgets
     Core
-    SerialPort
+    Qml
     )
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     Widgets
     Core
+    Qml
     )
 
 set(QT_LIBS
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Qml
     )
 endmacro()
 
