@@ -7,9 +7,6 @@
 #define GEN_KEY64(X, Y) (static_cast<qint64>(X) | (static_cast<qint64>(Y) << 32))
 
 namespace pico {
-using namespace binding;
-
-/* Public */
 
 InputHandler::InputHandler(QObject *parent)
     : QObject(parent),
@@ -89,7 +86,7 @@ InputHandler::addBinding(QList<QKeyCombination> keys, util::Mode mode, const cal
         return;
     Q_ASSERT(m_keyMapIndex = &m_keyMap);
 
-    binding::key64_t key;
+    key64_t key;
     QList<QKeyCombination>::iterator it_key;
     for (it_key = keys.begin(); it_key < keys.end() - 1; it_key++) {
         key = GEN_KEY64(it_key->toCombined(), mode);
@@ -109,8 +106,6 @@ err:
     qWarning() << "Binding:" << keys << "failed due to confilcting key combinations";
     resetMapIndex();
 }
-
-/* Private */
 
 [[nodiscard]] bool
 InputHandler::eventFilter(QObject *obj, QEvent *event)
