@@ -1,5 +1,6 @@
 #pragma once
 
+#include "editor/FileTree.hpp"
 #include <QFileSystemModel>
 #include <QGridLayout>
 #include <QTextEdit>
@@ -49,7 +50,7 @@ private:
     } m_dockState;
     QGridLayout *m_grid;
     QFileSystemModel *m_fsModel;
-    QTreeView *m_fileTree;
+    FileTree *m_fileTree;
 };
 
 } // namespace pico

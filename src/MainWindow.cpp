@@ -19,6 +19,11 @@ MainWindow::MainWindow(QMainWindow *parent)
     setFont(Editor::getInstance()->font());
 
     m_leftDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    m_leftDock->setTitleBarWidget(new QWidget());
+    m_rightDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    m_rightDock->setTitleBarWidget(new QWidget());
+    m_bottomDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    m_bottomDock->setTitleBarWidget(new QWidget());
 
     addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, m_leftDock);
     addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, m_rightDock);

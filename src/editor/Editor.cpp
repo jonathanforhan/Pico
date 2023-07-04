@@ -74,6 +74,10 @@ Editor::Init(void) /* Init is an extension of the constructor see header */
     addBinding({ Key_Space, Key_E }, Mode::Normal, [=]() {
         getCurrentBuffer()->toggleDock(Qt::DockWidgetArea::LeftDockWidgetArea);
     });
+
+    addBinding({ CTRL | Key_Backslash }, Mode::Normal, [=]() {
+        getCurrentBuffer()->toggleDock(Qt::DockWidgetArea::BottomDockWidgetArea);
+    });
 }
 
 Editor *
@@ -112,7 +116,7 @@ Editor::mode(void) const
     return m_inputHandler->m_mode;
 }
 
-inline void
+void
 Editor::setMode(util::Mode mode)
 {
     m_inputHandler->setMode(mode);

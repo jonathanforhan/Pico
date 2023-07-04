@@ -41,7 +41,7 @@ endif()
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
-    ${QT_LIBS}
+    ${EXTERN_LIBS}
     )
 
 target_include_directories(${CMAKE_PROJECT_NAME}

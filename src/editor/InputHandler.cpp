@@ -120,9 +120,6 @@ InputHandler::eventFilter(QObject *obj, QEvent *event)
             case Qt::Key_Control:
             case Qt::Key_Alt:
                 handleKeyRelease(static_cast<Qt::Key>(key));
-                return true;
-            default:
-                return false;
             }
         }
         return false;
@@ -130,8 +127,9 @@ InputHandler::eventFilter(QObject *obj, QEvent *event)
         int key = static_cast<QKeyEvent *>(event)->key();
         if (m_mode != util::Mode::Insert || key == Qt::Key_Control || key == Qt::Key_Alt ||
             key == Qt::Key_Shift || m_modifiers.control || m_modifiers.alt) {
+            auto prevMode = m_mode;
             handleKeyPress(static_cast<Qt::Key>(key));
-            if (m_keyMapIndex == &m_keyMap)
+            if (m_keyMapIndex == &m_keyMap && prevMode == m_mode)
                 return false;
             else
                 return true;

@@ -6,6 +6,7 @@
 #include "MainWindow.hpp"
 #include "editor/Editor.hpp"
 #include "editor/TextEdit.hpp"
+#include "extern/qlightterminal.h"
 
 namespace pico {
 
@@ -14,7 +15,7 @@ Buffer::Buffer(QWidget *parent)
       m_dockState({}),
       m_grid(new QGridLayout(this)),
       m_fsModel(new QFileSystemModel(this)),
-      m_fileTree(new QTreeView(this))
+      m_fileTree(new FileTree(this))
 {
     auto editor = Editor::getInstance();
     editor->forwardEventFilter(this);
@@ -48,9 +49,32 @@ Buffer::Buffer(QWidget *parent)
     m_fileTree->hideColumn(2);
     m_fileTree->hideColumn(3);
 
+    auto textEdit = new TextEdit(this);
+
+    m_fileTree->setMinimumWidth(300);
+    connect(m_fileTree, &FileTree::clicked, [=](const QModelIndex &i) {
+        auto path{ m_fsModel->filePath(i) };
+        QFile f(path);
+        if (!f.open(QIODevice::ReadOnly)) {
+            qWarning() << "File" << path << "failed to open";
+            return;
+        }
+        textEdit->clear();
+        QTextStream ss{ &f };
+        while (!ss.atEnd()) {
+            auto buffer = ss.read(2048);
+            textEdit->insertPlainText(buffer);
+        }
+        f.close();
+    });
     setDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, m_fileTree);
 
-    m_grid->addWidget(new TextEdit(this), 0, 0);
+    auto term = new QLightTerminal(this);
+    term->setMinimumHeight(300);
+    editor->forwardEventFilter(term);
+    setDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, term);
+
+    m_grid->addWidget(textEdit, 0, 0);
 }
 
 void
