@@ -34,7 +34,7 @@ public:
     util::Mode
     mode(void) const;
 
-    inline void
+    void
     setMode(util::Mode mode);
 
     inline bool

@@ -13,6 +13,7 @@ list(APPEND SOURCE_DIRS
     editor
     native
     util
+    extern
     )
 
 list(APPEND CMAKER_IGNORE

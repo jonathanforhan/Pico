@@ -12,20 +12,23 @@ find_package(QT NAMES Qt6 REQUIRED COMPONENTS
     Core
     Qml
     )
+
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     Widgets
     Core
     Qml
     )
 
-set(QT_LIBS
+set(EXTERN_LIBS
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Qml
     )
+
 endmacro()
 
 macro(QT_SETUP_EXE)
+
 if(APPLE)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE_GUI_IDENTIFIER cmaker.pico.com
