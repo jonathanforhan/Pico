@@ -25,6 +25,7 @@ Buffer::Buffer(QWidget *parent)
     m_grid->setSpacing(0);
     m_grid->setContentsMargins(0, 0, 0, 0);
     m_grid->addWidget(textEdit, 0, 0);
+
     textEdit->setFocus();
 }
 
