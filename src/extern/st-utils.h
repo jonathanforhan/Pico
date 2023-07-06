@@ -1,32 +1,30 @@
 #ifndef STUTILS_H
 #define STUTILS_H
 
-#include <stdint.h>
 #include <QObject>
+#include <stdint.h>
 
 /* macros */
-#define MIN(a, b)        ((a) < (b) ? (a) : (b))
-#define MAX(a, b)        ((a) < (b) ? (b) : (a))
-#define LEN(a)            (sizeof(a) / sizeof(a)[0])
-#define BETWEEN(x, a, b)    ((a) <= (x) && (x) <= (b))
-#define DIVCEIL(n, d)        (((n) + ((d) - 1)) / (d))
-#define DEFAULT(a, b)        (a) = (a) ? (a) : (b)
-#define LIMIT(x, a, b)        (x) = (x) < (a) ? (a) : (x) > (b) ? (b) : (x)
-#define ATTRCMP(a, b)        ((a).mode != (b).mode || (a).fg != (b).fg || \
-                (a).bg != (b).bg)
-#define TIMEDIFF(t1, t2)    ((t1.tv_sec-t2.tv_sec)*1000 + \
-                (t1.tv_nsec-t2.tv_nsec)/1E6)
-#define MODBIT(x, set, bit)    ((set) ? ((x) |= (bit)) : ((x) &= ~(bit)))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) < (b) ? (b) : (a))
+#define LEN(a) (sizeof(a) / sizeof(a)[0])
+#define BETWEEN(x, a, b) ((a) <= (x) && (x) <= (b))
+#define DIVCEIL(n, d) (((n) + ((d)-1)) / (d))
+#define DEFAULT(a, b) (a) = (a) ? (a) : (b)
+#define LIMIT(x, a, b) (x) = (x) < (a) ? (a) : (x) > (b) ? (b) : (x)
+#define ATTRCMP(a, b) ((a).mode != (b).mode || (a).fg != (b).fg || (a).bg != (b).bg)
+#define TIMEDIFF(t1, t2) ((t1.tv_sec - t2.tv_sec) * 1000 + (t1.tv_nsec - t2.tv_nsec) / 1E6)
+#define MODBIT(x, set, bit) ((set) ? ((x) |= (bit)) : ((x) &= ~(bit)))
 
-#define TRUECOLOR(r, g, b)    (1 << 24 | (r) << 16 | (g) << 8 | (b))
-#define IS_TRUECOL(x)        (1 << 24 & (x))
-#define TRUERED(x)        (((x) & 0xff0000) >> 8)
-#define TRUEGREEN(x)        (((x) & 0xff00))
-#define TRUEBLUE(x)        (((x) & 0xff) << 8)
+#define TRUECOLOR(r, g, b) (1 << 24 | (r) << 16 | (g) << 8 | (b))
+#define IS_TRUECOL(x) (1 << 24 & (x))
+#define TRUERED(x) (((x)&0xff0000) >> 8)
+#define TRUEGREEN(x) (((x)&0xff00))
+#define TRUEBLUE(x) (((x)&0xff) << 8)
 
-#define RED_FROM_TRUE(x)   (0xFF & (x >> 16))
-#define GREEN_FROM_TRUE(x)   (0xFF & (x >> 8))
-#define BLUE_FROM_TRUE(x)   (0xFF & x)
+#define RED_FROM_TRUE(x) (0xFF & (x >> 16))
+#define GREEN_FROM_TRUE(x) (0xFF & (x >> 8))
+#define BLUE_FROM_TRUE(x) (0xFF & x)
 
 enum glyph_attribute {
     ATTR_NULL = 0,
@@ -61,32 +59,32 @@ enum selection_snap {
 };
 
 /* Arbitrary sizes */
-#define UTF_INVALID   0xFFFD
-#define UTF_SIZ       4
-#define ESC_BUF_SIZ   (128*UTF_SIZ)
-#define ESC_ARG_SIZ   16
-#define STR_BUF_SIZ   ESC_BUF_SIZ
-#define STR_ARG_SIZ   ESC_ARG_SIZ
+#define UTF_INVALID 0xFFFD
+#define UTF_SIZ 4
+#define ESC_BUF_SIZ (128 * UTF_SIZ)
+#define ESC_ARG_SIZ 16
+#define STR_BUF_SIZ ESC_BUF_SIZ
+#define STR_ARG_SIZ ESC_ARG_SIZ
 #define HISTSIZE 1000
 
 /* macros */
-#define IS_SET(mode, flag)        ((mode & (flag)) != 0)
-#define ISCONTROLC0(c)        (BETWEEN(c, 0, 0x1f) || (c) == 0x7f)
-#define ISCONTROLC1(c)        (BETWEEN(c, 0x80, 0x9f))
-#define ISCONTROL(c)        (ISCONTROLC0(c) || ISCONTROLC1(c))
-#define ISDELIM(u)        (u && wcschr(L" ", u))
-#define TLINE(term, y)        ((y) < term.scr ? term.hist[((y) + term.histi - \
-                term.scr + HISTSIZE + 1) % HISTSIZE] : \
-                term.line[(y) - term.scr])
+#define IS_SET(mode, flag) ((mode & (flag)) != 0)
+#define ISCONTROLC0(c) (BETWEEN(c, 0, 0x1f) || (c) == 0x7f)
+#define ISCONTROLC1(c) (BETWEEN(c, 0x80, 0x9f))
+#define ISCONTROL(c) (ISCONTROLC0(c) || ISCONTROLC1(c))
+#define ISDELIM(u) (u && wcschr(L" ", u))
+#define TLINE(term, y)                                                                            \
+    ((y) < term.scr ? term.hist[((y) + term.histi - term.scr + HISTSIZE + 1) % HISTSIZE]          \
+                    : term.line[(y)-term.scr])
 
 typedef uint_least32_t Rune;
 
 #define Glyph Glyph_
 typedef struct {
-    Rune u;           /* character code */
-    ushort mode;      /* attribute flags */
-    uint32_t fg;      /* foreground  */
-    uint32_t bg;      /* background  */
+    Rune u;      /* character code */
+    ushort mode; /* attribute flags */
+    uint32_t fg; /* foreground  */
+    uint32_t bg; /* background  */
 } Glyph;
 
 typedef Glyph *Line;
@@ -132,10 +130,10 @@ enum charset {
 enum escape_state {
     ESC_START = 1,
     ESC_CSI = 2,
-    ESC_STR = 4,  /* DCS, OSC, PM, APC */
+    ESC_STR = 4, /* DCS, OSC, PM, APC */
     ESC_ALTCHARSET = 8,
     ESC_STR_END = 16, /* a final string was encountered */
-    ESC_TEST = 32, /* Enter in test mode */
+    ESC_TEST = 32,    /* Enter in test mode */
     ESC_UTF8 = 64,
 };
 
@@ -159,28 +157,28 @@ typedef struct {
 
 /* Internal representation of the screen */
 typedef struct {
-    int row;      /* nb row */
-    int col;      /* nb col */
-    Line *line;   /* screen */
-    Line *alt;    /* alternate screen */
+    int row;             /* nb row */
+    int col;             /* nb col */
+    Line *line;          /* screen */
+    Line *alt;           /* alternate screen */
     Line hist[HISTSIZE]; /* history buffer */
-    int histi;    /* history index */
-    int scr;      /* scroll back */
-    int altHisti; /* alt screen history index */
-    int altScr;   /* alt screen scrollback */
-    int *dirty;   /* dirtyness of lines */
-    TCursor c;    /* cursor */
-    int ocx;      /* old cursor col */
-    int ocy;      /* old cursor row */
-    int top;      /* top    scroll limit */
-    int bot;      /* bottom scroll limit */
-    int mode;     /* terminal mode flags */
-    int esc;      /* escape state flags */
-    char trantbl[4]; /* charset table translation */
-    int charset;  /* current charset */
-    int icharset; /* selected charset for sequence */
+    int histi;           /* history index */
+    int scr;             /* scroll back */
+    int altHisti;        /* alt screen history index */
+    int altScr;          /* alt screen scrollback */
+    int *dirty;          /* dirtyness of lines */
+    TCursor c;           /* cursor */
+    int ocx;             /* old cursor col */
+    int ocy;             /* old cursor row */
+    int top;             /* top    scroll limit */
+    int bot;             /* bottom scroll limit */
+    int mode;            /* terminal mode flags */
+    int esc;             /* escape state flags */
+    char trantbl[4];     /* charset table translation */
+    int charset;         /* current charset */
+    int icharset;        /* selected charset for sequence */
     int *tabs;
-    Rune lastc;   /* last printed char outside of sequence, 0 if control */
+    Rune lastc; /* last printed char outside of sequence, 0 if control */
 } Term;
 
 /* CSI Escape sequence structs */
@@ -190,34 +188,33 @@ typedef struct {
     size_t len;            /* raw string length */
     char priv;
     int arg[ESC_ARG_SIZ];
-    int narg;              /* nb of args */
+    int narg; /* nb of args */
     char mode[2];
 } CSIEscape;
 
 /* STR Escape sequence structs */
 /* ESC type [[ [<priv>] <arg> [;]] <mode>] ESC '\' */
 typedef struct {
-    char type;             /* ESC type ... */
-    char *buf;             /* allocated raw string */
-    size_t siz;            /* allocation size */
-    size_t len;            /* raw string length */
+    char type;  /* ESC type ... */
+    char *buf;  /* allocated raw string */
+    size_t siz; /* allocation size */
+    size_t len; /* raw string length */
     char *args[STR_ARG_SIZ];
-    int narg;              /* nb of args */
+    int narg; /* nb of args */
 } STREscape;
 
 static const char base64_digits[] = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0,
-        63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, -1, 0, 0, 0, 0, 1,
-        2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-        22, 23, 24, 25, 0, 0, 0, 0, 0, 0, 26, 27, 28, 29, 30, 31, 32, 33, 34,
-        35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  62, 0,  0,  0,  63,
+    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0,  0,  0,  -1, 0,  0,  0,  0,  1,  2,  3,  4,  5,  6,
+    7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,  0,  0,  0,  0,
+    0,  26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+    49, 50, 51, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
 enum win_mode {
@@ -239,17 +236,16 @@ enum win_mode {
     MODE_MOUSEMANY = 1 << 15,
     MODE_BRCKTPASTE = 1 << 16,
     MODE_NUMLOCK = 1 << 17,
-    MODE_MOUSE = MODE_MOUSEBTN | MODE_MOUSEMOTION | MODE_MOUSEX10\
- | MODE_MOUSEMANY,
+    MODE_MOUSE = MODE_MOUSEBTN | MODE_MOUSEMOTION | MODE_MOUSEX10 | MODE_MOUSEMANY,
 };
 
 /* Purely graphic info */
 typedef struct {
     int tw, th; /* tty width and height */
-    int w, h; /* window width and height */
-    int ch; /* char height */
-    int cw; /* char width  */
-    int mode; /* window state/mode flags */
+    int w, h;   /* window width and height */
+    int ch;     /* char height */
+    int cw;     /* char width  */
+    int mode;   /* window state/mode flags */
     int cursor; /* cursor style */
 } TermWindow;
 

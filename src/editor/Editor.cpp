@@ -24,59 +24,10 @@ Editor::Init(void) /* Init is an extension of the constructor see header */
     m_bufferStack->setSpacing(0);
     m_bufferStack->setContentsMargins(0, 0, 0, 0);
 
-    connect(m_bufferStack, &QStackedLayout::currentChanged, [=]() {
-        ((Buffer *)m_bufferStack->currentWidget())->updateDocks();
-    });
-
     addBuffer(new Buffer(this));
 
     addBinding({ Key_I }, Mode::Normal, [=]() {
         setMode(Mode::Insert);
-    });
-
-    addBinding({ Key_H }, Mode::Normal, [=]() {
-        // TODO better way to access buffer children
-        TextEdit *edit = static_cast<TextEdit *>(getCurrentBuffer()->getChildAtPosition(0, 0));
-        edit->moveCursor(QTextCursor::MoveOperation::Left);
-    });
-
-    addBinding({ Key_J }, Mode::Normal, [=]() {
-        TextEdit *edit = static_cast<TextEdit *>(getCurrentBuffer()->getChildAtPosition(0, 0));
-        edit->moveCursor(QTextCursor::MoveOperation::Down);
-    });
-
-    addBinding({ Key_K }, Mode::Normal, [=]() {
-        TextEdit *edit = static_cast<TextEdit *>(getCurrentBuffer()->getChildAtPosition(0, 0));
-        edit->moveCursor(QTextCursor::MoveOperation::Up);
-    });
-
-    addBinding({ Key_L }, Mode::Normal, [=]() {
-        TextEdit *edit = static_cast<TextEdit *>(getCurrentBuffer()->getChildAtPosition(0, 0));
-        edit->moveCursor(QTextCursor::MoveOperation::Right);
-    });
-
-    addBinding({ CTRL | Key_H }, Mode::Normal, [=]() {
-        prevBuffer();
-    });
-
-    addBinding({ CTRL | Key_L }, Mode::Normal, [=]() {
-        nextBuffer();
-    });
-
-    addBinding({ Key_Space, Key_B, Key_N }, Mode::Normal, [=]() {
-        addBuffer(new Buffer(this));
-    });
-
-    addBinding({ Key_Space, Key_B, Key_D }, Mode::Normal, [=]() {
-        removeBuffer(getCurrentBuffer());
-    });
-
-    addBinding({ Key_Space, Key_E }, Mode::Normal, [=]() {
-        getCurrentBuffer()->toggleDock(Qt::DockWidgetArea::LeftDockWidgetArea);
-    });
-
-    addBinding({ CTRL | Key_Backslash }, Mode::Normal, [=]() {
-        getCurrentBuffer()->toggleDock(Qt::DockWidgetArea::BottomDockWidgetArea);
     });
 }
 
@@ -104,7 +55,7 @@ Editor::forwardEventFilter(QWidget *widget)
     widget->installEventFilter(m_inputHandler);
 }
 
-inline void
+void
 Editor::addBinding(QList<QKeyCombination> keys, util::Mode mode, const std::function<void()> &fn)
 {
     m_inputHandler->addBinding(keys, mode, fn);
@@ -122,25 +73,25 @@ Editor::setMode(util::Mode mode)
     m_inputHandler->setMode(mode);
 }
 
-inline bool
+bool
 Editor::isShiftPressed(void)
 {
-    return static_cast<bool>(m_inputHandler->m_modifiers.shift);
+    return m_inputHandler->m_modifiers.shift;
 }
 
-inline bool
+bool
 Editor::isControlPressed(void)
 {
-    return static_cast<bool>(m_inputHandler->m_modifiers.control);
+    return m_inputHandler->m_modifiers.control;
 }
 
-inline bool
+bool
 Editor::isAltPressed(void)
 {
-    return static_cast<bool>(m_inputHandler->m_modifiers.alt);
+    return m_inputHandler->m_modifiers.alt;
 }
 
-inline void
+void
 Editor::nextBuffer(void)
 {
     auto i = m_bufferStack->currentIndex();
@@ -148,7 +99,7 @@ Editor::nextBuffer(void)
     m_bufferStack->setCurrentIndex(i);
 }
 
-inline void
+void
 Editor::prevBuffer(void)
 {
     auto i = m_bufferStack->currentIndex();
@@ -156,7 +107,7 @@ Editor::prevBuffer(void)
     m_bufferStack->setCurrentIndex(i);
 }
 
-inline void
+void
 Editor::nthBuffer(qsizetype i)
 {
     if (i < 0 || i <= m_bufferStack->count())
@@ -164,20 +115,20 @@ Editor::nthBuffer(qsizetype i)
     m_bufferStack->setCurrentIndex(i);
 }
 
-inline Buffer *
+Buffer *
 Editor::getCurrentBuffer(void)
 {
     return static_cast<Buffer *>(m_bufferStack->currentWidget());
 }
 
-inline void
+void
 Editor::addBuffer(Buffer *buffer)
 {
     m_bufferStack->addWidget(buffer);
     m_bufferStack->setCurrentWidget(buffer);
 }
 
-inline void
+void
 Editor::removeBuffer(Buffer *buffer)
 {
     m_bufferStack->removeWidget(buffer);

@@ -37,31 +37,31 @@ public:
     void
     setMode(util::Mode mode);
 
-    inline bool
+    bool
     isShiftPressed(void);
 
-    inline bool
+    bool
     isControlPressed(void);
 
-    inline bool
+    bool
     isAltPressed(void);
 
-    inline void
+    void
     nextBuffer(void);
 
-    inline void
+    void
     prevBuffer(void);
 
-    inline void
+    void
     nthBuffer(qsizetype i);
 
-    inline Buffer *
+    Buffer *
     getCurrentBuffer(void);
 
-    inline void
+    void
     addBuffer(Buffer *buffer);
 
-    inline void
+    void
     removeBuffer(Buffer *buffer);
 
 private:

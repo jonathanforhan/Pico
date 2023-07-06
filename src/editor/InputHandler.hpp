@@ -50,18 +50,15 @@ private:
     explicit InputHandler(QObject *parent = nullptr);
 
 private:
-    void
+    bool
     handleKeyPress(key64_t key);
 
-    void
+    bool
     handleKeyRelease(key64_t key);
 
     void
     addBinding(QList<QKeyCombination> keys, util::Mode mode, const callback_t &fn);
 
-    /* catches keyboard input, passes input it to
-     * handleKey* functions if the event is a keypress
-     * or forwards appropriate response */
     [[nodiscard]] bool
     eventFilter(QObject *obj, QEvent *event) override;
 

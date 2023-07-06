@@ -16,23 +16,23 @@ InputHandler::InputHandler(QObject *parent)
       m_keyMapIndex(&m_keyMap)
 {}
 
-void
+/* return true if key was mapped to binding */
+bool
 InputHandler::handleKeyPress(key64_t key)
 {
     // Handle modifiers (modifiers are very large ints)
+    // we don't capture mod keys
     if (key & util::QT_CUSTOM_HEX) {
         switch (key) {
         case Qt::Key_Shift:
             m_modifiers.shift++;
-            return;
+            return true;
         case Qt::Key_Control:
             m_modifiers.control++;
-            return;
+            return true;
         case Qt::Key_Alt:
             m_modifiers.alt++;
-            return;
-        default:
-            break;
+            return true;
         }
     }
 
@@ -51,12 +51,14 @@ InputHandler::handleKeyPress(key64_t key)
             /* traverse the keymap-tree */
             m_keyMapIndex = val.next;
         }
+        return true;
     } else {
         resetMapIndex();
+        return false;
     }
 }
 
-void
+bool
 InputHandler::handleKeyRelease(key64_t key)
 {
     if (key & util::QT_CUSTOM_HEX) {
@@ -65,18 +67,17 @@ InputHandler::handleKeyRelease(key64_t key)
         case Qt::Key_Shift:
             m_modifiers.shift--;
             m_modifiers.alt = 0;
-            break;
+            return true;
         case Qt::Key_Control:
             m_modifiers.control--;
             m_modifiers.alt = 0;
-            break;
+            return true;
         case Qt::Key_Alt:
             m_modifiers.alt = 0;
-            break;
-        default:
-            break;
+            return true;
         }
     }
+    return false;
 }
 
 void
@@ -88,17 +89,20 @@ InputHandler::addBinding(QList<QKeyCombination> keys, util::Mode mode, const cal
 
     key64_t key;
     QList<QKeyCombination>::iterator it_key;
+    /* setup the binding tree */
     for (it_key = keys.begin(); it_key < keys.end() - 1; it_key++) {
         key = GEN_KEY64(it_key->toCombined(), mode);
-        auto ret = m_keyMapIndex->emplace(key, new keymap_t).first;
-        if (ret->second.callable)
+        auto res = m_keyMapIndex->emplace(std::move(key), new keymap_t).first;
+        value_t &value = res->second;
+        if (value.callable)
             goto err;
-        m_keyMapIndex = ret->second.next;
+        m_keyMapIndex = value.next;
     }
+    /* put the callback on leaf node */
     key = GEN_KEY64(it_key->toCombined(), mode);
     if (m_keyMapIndex->find(key) != m_keyMapIndex->end())
         goto err;
-    m_keyMapIndex->emplace(key, callback_t{ std::move(fn) });
+    m_keyMapIndex->emplace(std::move(key), callback_t{ std::move(fn) });
 
     resetMapIndex();
     return;
@@ -111,38 +115,34 @@ err:
 [[nodiscard]] bool
 InputHandler::eventFilter(QObject *obj, QEvent *event)
 {
-    if (event->type() == QEvent::KeyRelease) {
-        int key = static_cast<QKeyEvent *>(event)->key();
+    using namespace Qt;
+    using namespace util;
+    auto key = static_cast<QKeyEvent *>(event)->key();
 
-        if (key & util::QT_CUSTOM_HEX) {
-            switch (key) {
-            case Qt::Key_Shift:
-            case Qt::Key_Control:
-            case Qt::Key_Alt:
-                handleKeyRelease(static_cast<Qt::Key>(key));
-            }
+    if (event->type() == QEvent::KeyRelease && key & QT_CUSTOM_HEX) {
+        switch (key) {
+        case Key_Shift:
+        case Key_Control:
+        case Key_Alt:
+            return handleKeyRelease(key);
         }
-        return false;
     } else if (event->type() == QEvent::KeyPress) {
-        int key = static_cast<QKeyEvent *>(event)->key();
-        if (m_mode != util::Mode::Insert || key == Qt::Key_Control || key == Qt::Key_Alt ||
-            key == Qt::Key_Shift || m_modifiers.control || m_modifiers.alt) {
-            auto prevMode = m_mode;
-            handleKeyPress(static_cast<Qt::Key>(key));
-            if (m_keyMapIndex == &m_keyMap && prevMode == m_mode)
-                return false;
-            else
-                return true;
-        } else if (key == Qt::Key_Escape) {
-            setMode(util::Mode::Normal);
-            return true;
-        } else {
-            return false;
+        if (key & QT_CUSTOM_HEX) {
+            switch (key) {
+            case Key_Shift:
+            case Key_Control:
+            case Key_Alt:
+                return handleKeyPress(key);
+            case Key_Escape:
+                setMode(Mode::Normal);
+            }
+        } else if (m_mode != Mode::Insert || m_modifiers.control || m_modifiers.alt) {
+            return handleKeyPress(key);
         }
-        return false;
     } else {
         return QObject::eventFilter(obj, event);
     }
+    return false;
 }
 
 void

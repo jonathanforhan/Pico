@@ -19,76 +19,18 @@ Buffer::Buffer(QWidget *parent)
 {
     auto editor = Editor::getInstance();
     editor->forwardEventFilter(this);
-    editor->forwardEventFilter(m_fileTree);
-    auto mainWindow = editor->getMainWindow();
-
-    connect(this, &Buffer::setDockWidget, [=](Qt::DockWidgetArea area, QWidget *widget) {
-        mainWindow->setDockWidget(area, widget);
-    });
-    connect(this, &Buffer::toggleDock, [=](Qt::DockWidgetArea area) {
-        mainWindow->toggleDock(area);
-        toggleDockState(area);
-    });
-    connect(this, &Buffer::hideDock, [=](Qt::DockWidgetArea area) {
-        mainWindow->hideDock(area);
-        setDockState(area, false);
-    });
-    connect(this, &Buffer::showDock, [=](Qt::DockWidgetArea area) {
-        mainWindow->showDock(area);
-        setDockState(area, true);
-    });
-
-    m_grid->setSpacing(0);
-    m_grid->setContentsMargins(0, 0, 0, 0);
-
-    m_fsModel->setRootPath(QDir::currentPath());
-    m_fileTree->setModel(m_fsModel);
-    m_fileTree->setRootIndex(m_fsModel->index(QDir::currentPath()));
-    m_fileTree->setHeaderHidden(true);
-    m_fileTree->hideColumn(1);
-    m_fileTree->hideColumn(2);
-    m_fileTree->hideColumn(3);
 
     auto textEdit = new TextEdit(this);
 
-    m_fileTree->setMinimumWidth(300);
-    connect(m_fileTree, &FileTree::clicked, [=](const QModelIndex &i) {
-        auto path{ m_fsModel->filePath(i) };
-        QFile f(path);
-        if (!f.open(QIODevice::ReadOnly)) {
-            qWarning() << "File" << path << "failed to open";
-            return;
-        }
-        textEdit->clear();
-        QTextStream ss{ &f };
-        while (!ss.atEnd()) {
-            auto buffer = ss.read(2048);
-            textEdit->insertPlainText(buffer);
-        }
-        f.close();
-    });
-    setDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, m_fileTree);
-
-    auto term = new QLightTerminal(this);
-    term->setMinimumHeight(300);
-    editor->forwardEventFilter(term);
-    setDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, term);
-
+    m_grid->setSpacing(0);
+    m_grid->setContentsMargins(0, 0, 0, 0);
     m_grid->addWidget(textEdit, 0, 0);
+    textEdit->setFocus();
 }
 
 void
 Buffer::updateDocks(void)
-{
-    auto mainWindow = Editor::getInstance()->getMainWindow();
-    mainWindow->hideAllDocks();
-    if (m_dockState.left)
-        mainWindow->showDock(Qt::DockWidgetArea::LeftDockWidgetArea);
-    if (m_dockState.right)
-        mainWindow->showDock(Qt::DockWidgetArea::RightDockWidgetArea);
-    if (m_dockState.bottom)
-        mainWindow->showDock(Qt::DockWidgetArea::BottomDockWidgetArea);
-}
+{}
 
 QWidget *
 Buffer::getChildAtPosition(int row, int col)

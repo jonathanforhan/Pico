@@ -26,9 +26,6 @@ FileTree::keyPressEvent(QKeyEvent *event)
         expand(currentIndex());
         if (!isExpanded(currentIndex()))
             clicked(currentIndex());
-        break;
-    default:
-        return;
     }
 }
 
