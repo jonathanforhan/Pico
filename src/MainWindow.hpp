@@ -15,11 +15,6 @@ public:
 private:
     QSize
     sizeHint(void) const override;
-
-private:
-    QDockWidget *m_leftDock;
-    QDockWidget *m_rightDock;
-    QDockWidget *m_bottomDock;
 };
 
 } // namespace pico

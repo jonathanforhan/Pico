@@ -1,79 +1,51 @@
 #pragma once
 
-#include <QStackedLayout>
+#include "util/Util.hpp"
+#include <QKeyEvent>
+#include <QMainWindow>
 #include <QWidget>
-
-#include "MainWindow.hpp"
-#include "editor/Buffer.hpp"
-#include "editor/InputHandler.hpp"
 
 namespace pico {
 
 /**
- * Editor is the MainWindow's central widget,
- * Editor is a singleton that in gotten through
- * it's instance pointer
+ * Singleton used to get and set editor state
  */
 class Editor final : public QWidget
 {
     Q_OBJECT
 
-public:
+public: /* functions */
     static Editor *
-    getInstance(QWidget *parent = nullptr);
-
-    MainWindow *
-    getMainWindow(void);
-
-    void
-    forwardEventFilter(QWidget *widget);
-
-    inline void
-    addBinding(QList<QKeyCombination> keys, util::Mode mode, const std::function<void()> &fn);
-
-    util::Mode
-    mode(void) const;
-
-    void
-    setMode(util::Mode mode);
+    getInstance(QMainWindow *parent = nullptr);
 
     bool
-    isShiftPressed(void);
+    shiftState(void);
 
     bool
-    isControlPressed(void);
+    controlState(void);
 
     bool
-    isAltPressed(void);
+    altState(void);
+
+    Mode
+    mode(void);
 
     void
-    nextBuffer(void);
+    setMode(Mode mode);
 
-    void
-    prevBuffer(void);
+private: /* vars */
+    struct {
+        unsigned shift : 2;
+        unsigned control : 2;
+        unsigned alt : 2;
+    } m_modState;
 
-    void
-    nthBuffer(qsizetype i);
+    Mode m_mode;
 
-    Buffer *
-    getCurrentBuffer(void);
+private: /* singleton setup */
+    explicit Editor(QMainWindow *parent = nullptr);
 
-    void
-    addBuffer(Buffer *buffer);
-
-    void
-    removeBuffer(Buffer *buffer);
-
-private:
-    InputHandler *m_inputHandler;
-    QStackedLayout *m_bufferStack;
-
-private: /* Singleton implementation */
-    Q_INVOKABLE
-    Editor(QWidget *parent = nullptr);
-    /* Init must be done after constructor
-     * to ensure no data races */
-    void
+    constexpr void
     Init(void);
 
     Editor(const Editor &) = delete;

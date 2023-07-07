@@ -362,8 +362,6 @@ QLightTerminal::paintEvent(QPaintEvent *event)
 void
 QLightTerminal::keyPressEvent(QKeyEvent *e)
 {
-    if (pico::Editor::getInstance()->mode() != pico::util::Mode::Insert)
-        return;
     e->accept();
     QString input = e->text();
     Qt::KeyboardModifiers mods = e->modifiers();

@@ -1,41 +1,16 @@
 #include "Editor.hpp"
-
 #include "MainWindow.hpp"
 #include "editor/TextEdit.hpp"
-#include "util/Util.hpp"
+#include <QBoxLayout>
+#include <QTextEdit>
+#include <QTreeView>
 
 namespace pico {
 
-Editor::Editor(QWidget *parent)
-    : QWidget(parent),
-      m_inputHandler(new InputHandler(this)),
-      m_bufferStack(new QStackedLayout(this))
-{
-    auto font = QFont{ "JetBrains Mono NF" };
-    font.setPixelSize(15);
-    setFont(font);
-}
-
-void
-Editor::Init(void) /* Init is an extension of the constructor see header */
-{
-    using namespace Qt;
-    using namespace util;
-    m_bufferStack->setSpacing(0);
-    m_bufferStack->setContentsMargins(0, 0, 0, 0);
-
-    addBuffer(new Buffer(this));
-
-    addBinding({ Key_I }, Mode::Normal, [=]() {
-        setMode(Mode::Insert);
-    });
-}
-
 Editor *
-Editor::getInstance(QWidget *parent)
+Editor::getInstance(QMainWindow *parent)
 {
     static Editor *instance = nullptr;
-    /* Generates instance on MainWindow creation */
     if (instance == nullptr) {
         instance = new Editor(parent);
         instance->Init();
@@ -43,95 +18,50 @@ Editor::getInstance(QWidget *parent)
     return instance;
 }
 
-MainWindow *
-Editor::getMainWindow(void)
+bool
+Editor::shiftState(void)
 {
-    return static_cast<MainWindow *>(parent());
-}
-
-void
-Editor::forwardEventFilter(QWidget *widget)
-{
-    widget->installEventFilter(m_inputHandler);
-}
-
-void
-Editor::addBinding(QList<QKeyCombination> keys, util::Mode mode, const std::function<void()> &fn)
-{
-    m_inputHandler->addBinding(keys, mode, fn);
-}
-
-util::Mode
-Editor::mode(void) const
-{
-    return m_inputHandler->m_mode;
-}
-
-void
-Editor::setMode(util::Mode mode)
-{
-    m_inputHandler->setMode(mode);
+    return m_modState.shift;
 }
 
 bool
-Editor::isShiftPressed(void)
+Editor::controlState(void)
 {
-    return m_inputHandler->m_modifiers.shift;
+    return m_modState.shift;
 }
 
 bool
-Editor::isControlPressed(void)
+Editor::altState(void)
 {
-    return m_inputHandler->m_modifiers.control;
+    return m_modState.shift;
 }
 
-bool
-Editor::isAltPressed(void)
+Mode
+Editor::mode(void)
 {
-    return m_inputHandler->m_modifiers.alt;
-}
-
-void
-Editor::nextBuffer(void)
-{
-    auto i = m_bufferStack->currentIndex();
-    i = i == m_bufferStack->count() - 1 ? 0 : i + 1;
-    m_bufferStack->setCurrentIndex(i);
+    return m_mode;
 }
 
 void
-Editor::prevBuffer(void)
+Editor::setMode(Mode mode)
 {
-    auto i = m_bufferStack->currentIndex();
-    i = i == 0 ? m_bufferStack->count() - 1 : i - 1;
-    m_bufferStack->setCurrentIndex(i);
+    m_mode = mode;
 }
 
-void
-Editor::nthBuffer(qsizetype i)
+Editor::Editor(QMainWindow *parent)
+    : QWidget(parent),
+      m_modState({}),
+      m_mode(Mode::Normal)
 {
-    if (i < 0 || i <= m_bufferStack->count())
-        return;
-    m_bufferStack->setCurrentIndex(i);
+    parent->setFont({ "JetBrains Mono NF", 11 });
+    auto layout = new QHBoxLayout(this);
+    layout->addWidget(new TextEdit(this));
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 }
 
-Buffer *
-Editor::getCurrentBuffer(void)
-{
-    return static_cast<Buffer *>(m_bufferStack->currentWidget());
-}
-
-void
-Editor::addBuffer(Buffer *buffer)
-{
-    m_bufferStack->addWidget(buffer);
-    m_bufferStack->setCurrentWidget(buffer);
-}
-
-void
-Editor::removeBuffer(Buffer *buffer)
-{
-    m_bufferStack->removeWidget(buffer);
-}
+constexpr void
+Editor::Init(void)
+{}
 
 } // namespace pico
