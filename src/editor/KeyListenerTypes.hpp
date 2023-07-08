@@ -4,9 +4,9 @@
 
 namespace pico {
 
-class KeyListenerPrivate
+class KeyListenerTypes
 {
-private: /* typedecl */
+protected: /* typedecl */
     /* Type declarations */
     struct value;
     typedef qint64 key64_t;
@@ -35,9 +35,6 @@ private: /* typedecl */
             const callback_t callback;
         };
     } value_t;
-
-private:
-    friend class KeyListener;
 };
 
 } // namespace pico

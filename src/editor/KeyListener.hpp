@@ -1,32 +1,30 @@
 #pragma once
 
 #include <QObject>
-#include <functional>
-#include <unordered_map>
 
-#include "editor/KeyListenerPrivate.hpp"
+#include "editor/KeyListenerTypes.hpp"
 #include "util/Util.hpp"
 
 namespace pico {
 
-class KeyListener : public QObject, private KeyListenerPrivate
+class KeyListener : public QObject, public KeyListenerTypes
 {
     Q_OBJECT
 
 public:
     explicit KeyListener(QObject *parent = nullptr);
 
-    void
+    virtual bool
     handleKeyPress(key64_t key);
 
     bool
     addBinding(QList<QKeyCombination> keyCombo, Mode mode, callback_t callback);
 
-private:
+protected:
     void
     resetMapIndex(void);
 
-private:
+protected:
     /* A map of infinite maps/functions used for key chords */
     keymap_t m_keyMap;
     /* tracks the key chord current state */

@@ -8,11 +8,12 @@ namespace pico {
 
 TextEdit::TextEdit(QWidget *parent)
     : QTextEdit(parent),
-      m_keyListener(parent)
+      PicoObject(this)
 {
-    m_keyListener.addBinding({ Key_I }, Mode::Normal, [=]() {
-        qDebug() << "BINDING HIT";
-        Editor::getInstance()->setMode(Mode::Insert);
+    auto editor = Editor::getInstance();
+
+    addBinding({ Key_I }, Mode::Normal, [=]() {
+        editor->setMode(Mode::Insert);
     });
 }
 
@@ -22,10 +23,7 @@ TextEdit::keyPressEvent(QKeyEvent *event)
     auto editor = Editor::getInstance();
 
     if (editor->mode() != Mode::Insert)
-        m_keyListener.handleKeyPress(event->key());
-    // TODO its EventListen who handles escape
-    else if (event->key() == Qt::Key_Escape)
-        editor->setMode(Mode::Normal);
+        handleKeyPress(event->key());
     else
         QTextEdit::keyPressEvent(event);
 }

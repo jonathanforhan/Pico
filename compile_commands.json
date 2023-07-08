@@ -21,13 +21,18 @@
 },
 {
   "directory": "/home/jon/dev/pico/build-debug",
-  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_QML_LIB -DQT_WIDGETS_LIB -I/home/jon/dev/pico/build-debug/pico_autogen/include -I/home/jon/dev/pico/src -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -isystem /usr/include/x86_64-linux-gnu/qt6/QtQml -isystem /usr/include/x86_64-linux-gnu/qt6/QtNetwork  -Wall -Wextra -Wpedantic -std=c++17 -g -fPIC -std=gnu++17 -o CMakeFiles/pico.dir/src/editor/EventListener.cpp.o -c /home/jon/dev/pico/src/editor/EventListener.cpp",
-  "file": "/home/jon/dev/pico/src/editor/EventListener.cpp"
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_QML_LIB -DQT_WIDGETS_LIB -I/home/jon/dev/pico/build-debug/pico_autogen/include -I/home/jon/dev/pico/src -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -isystem /usr/include/x86_64-linux-gnu/qt6/QtQml -isystem /usr/include/x86_64-linux-gnu/qt6/QtNetwork  -Wall -Wextra -Wpedantic -std=c++17 -g -fPIC -std=gnu++17 -o CMakeFiles/pico.dir/src/editor/KeyFilter.cpp.o -c /home/jon/dev/pico/src/editor/KeyFilter.cpp",
+  "file": "/home/jon/dev/pico/src/editor/KeyFilter.cpp"
 },
 {
   "directory": "/home/jon/dev/pico/build-debug",
   "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_QML_LIB -DQT_WIDGETS_LIB -I/home/jon/dev/pico/build-debug/pico_autogen/include -I/home/jon/dev/pico/src -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -isystem /usr/include/x86_64-linux-gnu/qt6/QtQml -isystem /usr/include/x86_64-linux-gnu/qt6/QtNetwork  -Wall -Wextra -Wpedantic -std=c++17 -g -fPIC -std=gnu++17 -o CMakeFiles/pico.dir/src/editor/KeyListener.cpp.o -c /home/jon/dev/pico/src/editor/KeyListener.cpp",
   "file": "/home/jon/dev/pico/src/editor/KeyListener.cpp"
+},
+{
+  "directory": "/home/jon/dev/pico/build-debug",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_QML_LIB -DQT_WIDGETS_LIB -I/home/jon/dev/pico/build-debug/pico_autogen/include -I/home/jon/dev/pico/src -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -isystem /usr/include/x86_64-linux-gnu/qt6/QtQml -isystem /usr/include/x86_64-linux-gnu/qt6/QtNetwork  -Wall -Wextra -Wpedantic -std=c++17 -g -fPIC -std=gnu++17 -o CMakeFiles/pico.dir/src/editor/PicoObject.cpp.o -c /home/jon/dev/pico/src/editor/PicoObject.cpp",
+  "file": "/home/jon/dev/pico/src/editor/PicoObject.cpp"
 },
 {
   "directory": "/home/jon/dev/pico/build-debug",

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "editor/KeyFilter.hpp"
 #include "util/Util.hpp"
 #include <QKeyEvent>
 #include <QMainWindow>
@@ -17,6 +18,9 @@ class Editor final : public QWidget
 public: /* functions */
     static Editor *
     getInstance(QMainWindow *parent = nullptr);
+
+    void
+    forwardKeyFilter(QObject *obj);
 
     bool
     shiftState(void);
@@ -38,20 +42,23 @@ private: /* vars */
         unsigned shift : 2;
         unsigned control : 2;
         unsigned alt : 2;
-    } m_modState;
-
+    } m_modifiers;
     Mode m_mode;
+    KeyFilter m_keyFilter;
 
 private: /* singleton setup */
     explicit Editor(QMainWindow *parent = nullptr);
 
-    constexpr void
+    void
     Init(void);
 
     Editor(const Editor &) = delete;
 
     void
     operator=(const Editor &) = delete;
+
+private:
+    friend class KeyFilter;
 };
 
 } // namespace pico

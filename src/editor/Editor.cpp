@@ -1,6 +1,7 @@
 #include "Editor.hpp"
 #include "MainWindow.hpp"
 #include "editor/TextEdit.hpp"
+#include "util/Util.hpp"
 #include <QBoxLayout>
 #include <QTextEdit>
 #include <QTreeView>
@@ -18,22 +19,28 @@ Editor::getInstance(QMainWindow *parent)
     return instance;
 }
 
+void
+Editor::forwardKeyFilter(QObject *obj)
+{
+    obj->installEventFilter(&this->m_keyFilter);
+}
+
 bool
 Editor::shiftState(void)
 {
-    return m_modState.shift;
+    return m_modifiers.shift;
 }
 
 bool
 Editor::controlState(void)
 {
-    return m_modState.shift;
+    return m_modifiers.shift;
 }
 
 bool
 Editor::altState(void)
 {
-    return m_modState.shift;
+    return m_modifiers.shift;
 }
 
 Mode
@@ -50,18 +57,27 @@ Editor::setMode(Mode mode)
 
 Editor::Editor(QMainWindow *parent)
     : QWidget(parent),
-      m_modState({}),
-      m_mode(Mode::Normal)
+      m_modifiers({}),
+      m_mode(Mode::Normal),
+      m_keyFilter({})
 {
     parent->setFont({ "JetBrains Mono NF", 11 });
+}
+
+void
+Editor::Init(void)
+{
+    using namespace Qt;
     auto layout = new QHBoxLayout(this);
     layout->addWidget(new TextEdit(this));
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
-}
 
-constexpr void
-Editor::Init(void)
-{}
+    installEventFilter(&m_keyFilter);
+
+    m_keyFilter.addBinding({ Key_J, Key_K }, Mode::Normal, [=]() {
+        qDebug() << "J WOW";
+    });
+}
 
 } // namespace pico

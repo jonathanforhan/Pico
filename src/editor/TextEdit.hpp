@@ -1,11 +1,12 @@
 #pragma once
 
 #include "editor/KeyListener.hpp"
+#include "editor/PicoObject.hpp"
 #include <QTextEdit>
 
 namespace pico {
 
-class TextEdit : public QTextEdit
+class TextEdit : public QTextEdit, public PicoObject
 {
     Q_OBJECT
 
@@ -15,9 +16,6 @@ public:
 protected:
     void
     keyPressEvent(QKeyEvent *event) override;
-
-private:
-    KeyListener m_keyListener;
 };
 
 } // namespace pico

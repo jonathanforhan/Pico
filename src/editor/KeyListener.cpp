@@ -20,7 +20,7 @@ KeyListener::KeyListener(QObject *parent)
       m_keyMapIndex(&m_keyMap)
 {}
 
-void
+bool
 KeyListener::handleKeyPress(key64_t key)
 {
     auto editor = Editor::getInstance();
@@ -40,10 +40,10 @@ KeyListener::handleKeyPress(key64_t key)
             /* traverse the keymap-tree */
             m_keyMapIndex = val.next;
         }
-        return;
+        return true;
     } else {
         resetMapIndex();
-        return;
+        return false;
     }
 }
 
