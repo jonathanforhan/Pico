@@ -4,11 +4,7 @@
 
 #include <QDebug>
 
-constexpr qint64
-GEN_KEY64(int X, int Y)
-{
-    return (static_cast<qint64>(X) | (static_cast<qint64>(Y) << 32));
-}
+#define GEN_KEY64(X, Y) (static_cast<qint64>(X) | (static_cast<qint64>(Y) << 32))
 constexpr bool ERROR = false;
 constexpr bool SUCCESS = true;
 

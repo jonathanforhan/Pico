@@ -1,10 +1,12 @@
 #pragma once
 
-#include "editor/KeyFilter.hpp"
-#include "util/Util.hpp"
 #include <QKeyEvent>
 #include <QMainWindow>
+#include <QStackedLayout>
 #include <QWidget>
+
+#include "editor/KeyFilter.hpp"
+#include "util/Util.hpp"
 
 namespace pico {
 
@@ -37,6 +39,18 @@ public: /* functions */
     void
     setMode(Mode mode);
 
+    void
+    addBuffer(void);
+
+    void
+    nextBuffer(void);
+
+    void
+    prevBuffer(void);
+
+    void
+    nthBuffer(int index);
+
 private: /* vars */
     struct {
         unsigned shift : 2;
@@ -45,6 +59,7 @@ private: /* vars */
     } m_modifiers;
     Mode m_mode;
     KeyFilter m_keyFilter;
+    QStackedLayout *m_stack;
 
 private: /* singleton setup */
     explicit Editor(QMainWindow *parent = nullptr);

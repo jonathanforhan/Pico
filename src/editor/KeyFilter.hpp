@@ -12,13 +12,13 @@ class KeyFilter : public KeyListener
 public:
     explicit KeyFilter(QObject *parent = nullptr);
 
-private:
     bool
     handleKeyRelease(key64_t key);
 
     bool
     handleKeyPress(key64_t key) override;
 
+private:
     [[nodiscard]] bool
     eventFilter(QObject *obj, QEvent *event) override;
 };
