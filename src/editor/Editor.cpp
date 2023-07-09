@@ -1,12 +1,10 @@
 #include "Editor.hpp"
+#include <QApplication>
 #include <QStackedLayout>
 #include <QTextEdit>
 #include <QTreeView>
-#include <qapplication.h>
-#include <qnamespace.h>
 
 #include "MainWindow.hpp"
-#include "editor/Buffer.hpp"
 #include "editor/TextEdit.hpp"
 #include "util/Util.hpp"
 
@@ -26,7 +24,13 @@ Editor::getInstance(QMainWindow *parent)
 void
 Editor::forwardKeyFilter(QObject *obj)
 {
-    obj->installEventFilter(&this->m_keyFilter);
+    obj->installEventFilter(this->m_keyFilter);
+}
+
+bool
+Editor::addBinding(QList<QKeyCombination> keyCombo, Mode mode, std::function<void()> callback)
+{
+    return m_keyFilter->addBinding(keyCombo, mode, callback);
 }
 
 bool
@@ -59,6 +63,12 @@ Editor::setMode(Mode mode)
     m_mode = mode;
 }
 
+Buffer *
+Editor::currentBuffer(void)
+{
+    return static_cast<Buffer *>(m_stack->currentWidget());
+}
+
 void
 Editor::addBuffer(void)
 {
@@ -72,7 +82,6 @@ Editor::nextBuffer(void)
     if (i >= m_stack->count())
         i = 0;
     m_stack->setCurrentIndex(i);
-    qDebug() << i;
 }
 
 void
@@ -82,7 +91,6 @@ Editor::prevBuffer(void)
     if (i < 0)
         i = m_stack->count() - 1;
     m_stack->setCurrentIndex(i);
-    qDebug() << i;
 }
 
 void
@@ -97,7 +105,7 @@ Editor::Editor(QMainWindow *parent)
     : QWidget(parent),
       m_modifiers({}),
       m_mode(Mode::Normal),
-      m_keyFilter({}),
+      m_keyFilter(nullptr),
       m_stack(new QStackedLayout(this))
 {
     parent->setFont({ "JetBrains Mono NF", 11 });
@@ -108,26 +116,43 @@ Editor::Editor(QMainWindow *parent)
 void
 Editor::Init(void)
 {
-    using namespace Qt;
-    installEventFilter(&m_keyFilter);
+    /* initialize editor-instance dependent variables */
+    m_keyFilter = new KeyFilter(this);
 
+    using namespace Qt;
+    installEventFilter(m_keyFilter);
     m_stack->addWidget(new Buffer(this));
 
-    m_keyFilter.addBinding({ CTRL | Key_B }, Mode::Normal, [=]() {
+    addBinding({ CTRL | Key_B }, Mode::Normal, [=]() {
         prevBuffer();
     });
-    m_keyFilter.addBinding({ CTRL | Key_N }, Mode::Normal, [=]() {
+    addBinding({ CTRL | Key_N }, Mode::Normal, [=]() {
         nextBuffer();
     });
-    m_keyFilter.addBinding({ Key_Space, Key_B, Key_N }, Mode::Normal, [=]() {
+    addBinding({ Key_Space, Key_B, Key_N }, Mode::Normal, [=]() {
         addBuffer();
     });
-    m_keyFilter.addBinding({ Key_F, Key_R, Key_I, Key_E, Key_D }, Mode::Normal, [=]() {
-        qDebug() << "FRIED";
+    addBinding({ Key_Space, Key_V }, Mode::Normal, [=]() {
+        currentBuffer()->splitLeft(new TextEdit(this));
+    });
+    addBinding({ Key_Space, Key_V | SHIFT }, Mode::Normal, [=]() {
+        currentBuffer()->splitRight(new TextEdit(this));
+    });
+    addBinding({ Key_Space, Key_H }, Mode::Normal, [=]() {
+        currentBuffer()->splitTop(new TextEdit(this));
+    });
+    addBinding({ Key_Space, Key_H | SHIFT }, Mode::Normal, [=]() {
+        currentBuffer()->splitBottom(new TextEdit(this));
+    });
+    addBinding({ Key_Space, Key_E }, Mode::Normal, [=]() {
+        currentBuffer()->toggleFileTree();
+    });
+    addBinding({ Key_Space, Key_O }, Mode::Normal, [=]() {
+        currentBuffer()->showFileTree();
     });
 
     /* example of remapping TODO better implementation */
-    m_keyFilter.addBinding({ Key_J, Key_K }, Mode::Normal, [=]() {
+    addBinding({ Key_J, Key_K }, Mode::Normal, [=]() {
         auto *e = new QKeyEvent(QEvent::KeyPress, Qt::Key_I, Qt::NoModifier);
         QApplication::postEvent(QApplication::focusWidget(), (QEvent *)e);
     });

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "editor/KeyListener.hpp"
 #include <QObject>
+
+#include "editor/KeyListener.hpp"
 
 namespace pico {
 
@@ -21,6 +22,9 @@ public:
 private:
     [[nodiscard]] bool
     eventFilter(QObject *obj, QEvent *event) override;
+
+private:
+    void *m_editor;
 };
 
 } // namespace pico

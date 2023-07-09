@@ -5,6 +5,7 @@
 #include <QStackedLayout>
 #include <QWidget>
 
+#include "editor/Buffer.hpp"
 #include "editor/KeyFilter.hpp"
 #include "util/Util.hpp"
 
@@ -25,6 +26,9 @@ public: /* functions */
     forwardKeyFilter(QObject *obj);
 
     bool
+    addBinding(QList<QKeyCombination> keyCombo, Mode mode, std::function<void()> callback);
+
+    bool
     shiftState(void);
 
     bool
@@ -38,6 +42,9 @@ public: /* functions */
 
     void
     setMode(Mode mode);
+
+    Buffer *
+    currentBuffer(void);
 
     void
     addBuffer(void);
@@ -58,7 +65,7 @@ private: /* vars */
         unsigned alt : 2;
     } m_modifiers;
     Mode m_mode;
-    KeyFilter m_keyFilter;
+    KeyFilter *m_keyFilter;
     QStackedLayout *m_stack;
 
 private: /* singleton setup */

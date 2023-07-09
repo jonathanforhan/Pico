@@ -13,13 +13,14 @@ namespace pico {
 KeyListener::KeyListener(QObject *parent)
     : QObject(parent),
       m_keyMap(keymap_t{}),
-      m_keyMapIndex(&m_keyMap)
+      m_keyMapIndex(&m_keyMap),
+      m_editor(Editor::getInstance())
 {}
 
 bool
 KeyListener::handleKeyPress(key64_t key)
 {
-    auto editor = Editor::getInstance();
+    auto editor = static_cast<Editor *>(m_editor);
 
     key |= Qt::SHIFT * editor->shiftState();
     key |= Qt::CTRL * editor->controlState();
@@ -32,11 +33,12 @@ KeyListener::handleKeyPress(key64_t key)
         if (val.callable) {
             val.callback();
             resetMapIndex();
+            return true;
         } else {
             /* traverse the keymap-tree */
             m_keyMapIndex = val.next;
+            return false;
         }
-        return true;
     } else {
         resetMapIndex();
         return false;
@@ -68,7 +70,7 @@ KeyListener::addBinding(QList<QKeyCombination> keyCombo, Mode mode, callback_t c
     key = GEN_KEY64(it_key->toCombined(), mode);
 
     if (m_keyMapIndex->find(key) == m_keyMapIndex->end())
-        m_keyMapIndex->emplace(std::move(key), callback_t{ std::move(callback) });
+        m_keyMapIndex->emplace(std::move(key), std::move(callback));
     else
         goto err;
 

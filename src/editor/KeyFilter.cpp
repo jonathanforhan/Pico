@@ -6,22 +6,19 @@
 
 #include <editor/Editor.hpp>
 
-constexpr qint64
-GEN_KEY64(int X, int Y)
-{
-    return (static_cast<qint64>(X) | (static_cast<qint64>(Y) << 32));
-}
+#define GEN_KEY64(X, Y) (static_cast<qint64>(X) | (static_cast<qint64>(Y) << 32))
 
 namespace pico {
 
 KeyFilter::KeyFilter(QObject *parent)
-    : KeyListener(parent)
+    : KeyListener(parent),
+      m_editor(Editor::getInstance())
 {}
 
 bool
 KeyFilter::handleKeyRelease(key64_t key)
 {
-    Editor *editor = Editor::getInstance();
+    Editor *editor = static_cast<Editor *>(m_editor);
 
     switch (key) {
     case Qt::Key_Shift:
@@ -42,7 +39,7 @@ KeyFilter::handleKeyRelease(key64_t key)
 bool
 KeyFilter::handleKeyPress(key64_t key)
 {
-    Editor *editor = Editor::getInstance();
+    Editor *editor = static_cast<Editor *>(m_editor);
 
     switch (key) {
     case Qt::Key_Shift:
@@ -67,11 +64,12 @@ KeyFilter::handleKeyPress(key64_t key)
         if (val.callable) {
             val.callback();
             resetMapIndex();
+            return true;
         } else {
             /* traverse the keymap-tree */
             m_keyMapIndex = val.next;
+            return false; /* return false to not block keys of remaps */
         }
-        return true;
     } else {
         resetMapIndex();
         return false;
@@ -81,7 +79,7 @@ KeyFilter::handleKeyPress(key64_t key)
 bool
 KeyFilter::eventFilter(QObject *obj, QEvent *event)
 {
-    Editor *editor = Editor::getInstance();
+    Editor *editor = static_cast<Editor *>(m_editor);
 
     if (event->type() == QEvent::KeyRelease) {
         Qt::Key key = static_cast<Qt::Key>(static_cast<QKeyEvent *>(event)->key());

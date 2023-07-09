@@ -29,6 +29,7 @@ protected:
     keymap_t m_keyMap;
     /* tracks the key chord current state */
     keymap_t *m_keyMapIndex;
+    void *m_editor;
 };
 
 } // namespace pico
