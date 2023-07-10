@@ -3,14 +3,15 @@
 #include "editor/KeyListener.hpp"
 namespace pico {
 
-class PicoObject
+class PicoWidget
 {
 protected:
-    explicit PicoObject(QObject *obj);
+    explicit PicoWidget(QWidget *child);
 
     virtual bool
     handleKeyPress(qint64 key);
 
+public:
     bool
     addBinding(QList<QKeyCombination> keyCombo, Mode mode, std::function<void()> callback);
 

@@ -8,7 +8,7 @@ namespace pico {
 
 TextEdit::TextEdit(QWidget *parent)
     : QTextEdit(parent),
-      PicoObject(this)
+      PicoWidget(this)
 {
     auto editor = Editor::getInstance();
 

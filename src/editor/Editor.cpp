@@ -61,6 +61,7 @@ void
 Editor::setMode(Mode mode)
 {
     m_mode = mode;
+    modeChange(mode);
 }
 
 Buffer *
@@ -108,7 +109,6 @@ Editor::Editor(QMainWindow *parent)
       m_keyFilter(nullptr),
       m_stack(new QStackedLayout(this))
 {
-    parent->setFont({ "JetBrains Mono NF", 11 });
     m_stack->setSpacing(0);
     m_stack->setContentsMargins(0, 0, 0, 0);
 }
@@ -135,13 +135,7 @@ Editor::Init(void)
     addBinding({ Key_Space, Key_V }, Mode::Normal, [=]() {
         currentBuffer()->splitLeft(new TextEdit(this));
     });
-    addBinding({ Key_Space, Key_V | SHIFT }, Mode::Normal, [=]() {
-        currentBuffer()->splitRight(new TextEdit(this));
-    });
     addBinding({ Key_Space, Key_H }, Mode::Normal, [=]() {
-        currentBuffer()->splitTop(new TextEdit(this));
-    });
-    addBinding({ Key_Space, Key_H | SHIFT }, Mode::Normal, [=]() {
         currentBuffer()->splitBottom(new TextEdit(this));
     });
     addBinding({ Key_Space, Key_E }, Mode::Normal, [=]() {

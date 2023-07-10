@@ -8,7 +8,7 @@ namespace pico {
 
 FileTree::FileTree(QWidget *parent)
     : QTreeView(parent),
-      PicoObject(this)
+      PicoWidget(this)
 {
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

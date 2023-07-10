@@ -2,11 +2,11 @@
 
 #include <QTreeView>
 
-#include "editor/PicoObject.hpp"
+#include "editor/PicoWidget.hpp"
 
 namespace pico {
 
-class FileTree : public QTreeView, public PicoObject
+class FileTree : public QTreeView, public PicoWidget
 {
     Q_OBJECT
 

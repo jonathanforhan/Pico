@@ -58,6 +58,10 @@ public: /* functions */
     void
     nthBuffer(int index);
 
+signals:
+    void
+    modeChange(Mode mode);
+
 private: /* vars */
     struct {
         unsigned shift : 2;

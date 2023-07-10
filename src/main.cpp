@@ -9,6 +9,7 @@ main(int argc, char *argv[])
     QApplication::setApplicationVersion("1.0.0");
     QApplication::setOrganizationName("Pico");
     QApplication::setApplicationDisplayName("Pico");
+    QApplication::setFont(QFont{ "JetBrains Mono NF", 11 });
 
     pico::MainWindow window;
     window.show();
