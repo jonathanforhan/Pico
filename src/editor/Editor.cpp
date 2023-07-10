@@ -150,12 +150,6 @@ Editor::Init(void)
     addBinding({ Key_Space, Key_O }, Mode::Normal, [=]() {
         currentBuffer()->showFileTree();
     });
-
-    /* example of remapping TODO better implementation */
-    addBinding({ Key_J, Key_K }, Mode::Normal, [=]() {
-        auto *e = new QKeyEvent(QEvent::KeyPress, Qt::Key_I, Qt::NoModifier);
-        QApplication::postEvent(QApplication::focusWidget(), (QEvent *)e);
-    });
 }
 
 } // namespace pico

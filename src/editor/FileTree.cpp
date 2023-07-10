@@ -1,5 +1,6 @@
 #include "FileTree.hpp"
 
+#include <QFileIconProvider>
 #include <QFileSystemModel>
 #include <QKeyEvent>
 
@@ -9,16 +10,22 @@ FileTree::FileTree(QWidget *parent)
     : QTreeView(parent),
       PicoObject(this)
 {
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
     auto fs = new QFileSystemModel(this);
     fs->setRootPath(QDir::currentPath());
-    this->setModel(fs);
-    this->setRootIndex(fs->index(QDir::currentPath()));
-    this->setHeaderHidden(true);
-    this->hideColumn(1);
-    this->hideColumn(2);
-    this->hideColumn(3);
-    this->setMaximumWidth(400);
-    this->setUniformRowHeights(true);
+    fs->setOption(QFileSystemModel::DontWatchForChanges);
+    fs->setOption(QFileSystemModel::DontUseCustomDirectoryIcons);
+    setModel(fs);
+    setRootIndex(fs->index(QDir::currentPath()));
+    setHeaderHidden(true);
+    hideColumn(1);
+    hideColumn(2);
+    hideColumn(3);
+    setMaximumWidth(400);
+    setUniformRowHeights(true);
+    setSortingEnabled(false);
 }
 
 void

@@ -7,7 +7,6 @@ namespace pico {
 
 Buffer::Buffer(QWidget *parent)
     : QWidget(parent),
-      PicoObject(this),
       m_layout(new QHBoxLayout(this)),
       m_splitter(new QSplitter(this)),
       m_fileTree(new FileTree(m_splitter))
@@ -17,7 +16,9 @@ Buffer::Buffer(QWidget *parent)
     m_layout->addWidget(m_splitter);
     m_splitter->setHandleWidth(0);
 
-    m_splitter->addWidget(new TextEdit(this));
+    auto *textEdit = new TextEdit(this);
+    m_splitter->addWidget(textEdit);
+    textEdit->setFocus();
 }
 
 QSplitter *
@@ -29,52 +30,144 @@ Buffer::splitter()
 void
 Buffer::splitLeft(QWidget *widget)
 {
-    m_layout->removeWidget(m_splitter);
-    auto *oldSplitter = m_splitter;
-    m_splitter = new QSplitter(this);
-    m_splitter->setHandleWidth(0);
-    m_splitter->addWidget(widget);
-    m_splitter->addWidget(oldSplitter);
-    m_layout->addWidget(m_splitter);
+    auto *oldWidget = (QWidget *)QApplication::focusWidget()->parent();
+    auto *parentSplitter = (QSplitter *)oldWidget->parent();
+
+    QWidget *oldSplitter;
+    if (oldWidget == m_splitter) {
+        parentSplitter = NULL;
+        /* can't use parentSplitter here it would be UB */
+
+        m_layout->removeWidget(m_splitter);
+        oldSplitter = m_splitter;
+        m_splitter = new QSplitter(this);
+        m_splitter->setHandleWidth(0);
+        m_splitter->addWidget(widget);
+        m_splitter->addWidget(oldSplitter);
+        m_layout->addWidget(m_splitter);
+
+    } else {
+        int i = parentSplitter->indexOf(oldWidget);
+        if (i == -1)
+            return;
+
+        oldSplitter = parentSplitter->widget(i);
+        auto *newSplitter = new QSplitter(this);
+        newSplitter->setHandleWidth(0);
+
+        parentSplitter->replaceWidget(i, newSplitter);
+        newSplitter->addWidget(widget);
+        newSplitter->addWidget(oldSplitter);
+    }
+    m_fileTree->setParent(m_splitter);
     widget->setFocus();
 }
 
 void
 Buffer::splitRight(QWidget *widget)
 {
-    m_layout->removeWidget(m_splitter);
-    auto *oldSplitter = m_splitter;
-    m_splitter = new QSplitter(this);
-    m_splitter->setHandleWidth(0);
-    m_splitter->addWidget(oldSplitter);
-    m_splitter->addWidget(widget);
-    m_layout->addWidget(m_splitter);
+    auto *oldWidget = (QWidget *)QApplication::focusWidget()->parent();
+    auto *parentSplitter = (QSplitter *)oldWidget->parent();
+
+    QWidget *oldSplitter;
+    if (oldWidget == m_splitter) {
+        parentSplitter = NULL;
+        /* can't use parentSplitter here it would be UB */
+
+        m_layout->removeWidget(m_splitter);
+        oldSplitter = m_splitter;
+        m_splitter = new QSplitter(this);
+        m_splitter->setHandleWidth(0);
+        m_splitter->addWidget(oldSplitter);
+        m_splitter->addWidget(widget);
+        m_layout->addWidget(m_splitter);
+
+    } else {
+        int i = parentSplitter->indexOf(oldWidget);
+        if (i == -1)
+            return;
+
+        oldSplitter = parentSplitter->widget(i);
+        auto *newSplitter = new QSplitter(this);
+        newSplitter->setHandleWidth(0);
+
+        parentSplitter->replaceWidget(i, newSplitter);
+        newSplitter->addWidget(oldSplitter);
+        newSplitter->addWidget(widget);
+    }
+    m_fileTree->setParent(m_splitter);
     widget->setFocus();
 }
 
 void
 Buffer::splitTop(QWidget *widget)
 {
-    m_layout->removeWidget(m_splitter);
-    auto *oldSplitter = m_splitter;
-    m_splitter = new QSplitter(Qt::Vertical, this);
-    m_splitter->setHandleWidth(0);
-    m_splitter->addWidget(widget);
-    m_splitter->addWidget(oldSplitter);
-    m_layout->addWidget(m_splitter);
+    auto *oldWidget = (QWidget *)QApplication::focusWidget()->parent();
+    auto *parentSplitter = (QSplitter *)oldWidget->parent();
+
+    QWidget *oldSplitter;
+    if (oldWidget == m_splitter) {
+        parentSplitter = NULL;
+        /* can't use parentSplitter here it would be UB */
+
+        m_layout->removeWidget(m_splitter);
+        oldSplitter = m_splitter;
+        m_splitter = new QSplitter(Qt::Vertical, this);
+        m_splitter->setHandleWidth(0);
+        m_splitter->addWidget(widget);
+        m_splitter->addWidget(oldSplitter);
+        m_layout->addWidget(m_splitter);
+
+    } else {
+        int i = parentSplitter->indexOf(oldWidget);
+        if (i == -1)
+            return;
+
+        oldSplitter = parentSplitter->widget(i);
+        auto *newSplitter = new QSplitter(Qt::Vertical, this);
+        newSplitter->setHandleWidth(0);
+
+        parentSplitter->replaceWidget(i, newSplitter);
+        newSplitter->addWidget(widget);
+        newSplitter->addWidget(oldSplitter);
+    }
+    m_fileTree->setParent(m_splitter);
     widget->setFocus();
 }
 
 void
 Buffer::splitBottom(QWidget *widget)
 {
-    m_layout->removeWidget(m_splitter);
-    auto *oldSplitter = m_splitter;
-    m_splitter = new QSplitter(Qt::Vertical, this);
-    m_splitter->setHandleWidth(0);
-    m_splitter->addWidget(oldSplitter);
-    m_splitter->addWidget(widget);
-    m_layout->addWidget(m_splitter);
+    auto *oldWidget = (QWidget *)QApplication::focusWidget()->parent();
+    auto *parentSplitter = (QSplitter *)oldWidget->parent();
+
+    QWidget *oldSplitter;
+    if (oldWidget == m_splitter) {
+        parentSplitter = NULL;
+        /* can't use parentSplitter here it would be UB */
+
+        m_layout->removeWidget(m_splitter);
+        oldSplitter = m_splitter;
+        m_splitter = new QSplitter(Qt::Vertical, this);
+        m_splitter->setHandleWidth(0);
+        m_splitter->addWidget(oldSplitter);
+        m_splitter->addWidget(widget);
+        m_layout->addWidget(m_splitter);
+
+    } else {
+        int i = parentSplitter->indexOf(oldWidget);
+        if (i == -1)
+            return;
+
+        oldSplitter = parentSplitter->widget(i);
+        auto *newSplitter = new QSplitter(Qt::Vertical, this);
+        newSplitter->setHandleWidth(0);
+
+        parentSplitter->replaceWidget(i, newSplitter);
+        newSplitter->addWidget(oldSplitter);
+        newSplitter->addWidget(widget);
+    }
+    m_fileTree->setParent(m_splitter);
     widget->setFocus();
 }
 

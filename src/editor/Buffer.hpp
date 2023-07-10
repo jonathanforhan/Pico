@@ -9,7 +9,7 @@
 
 namespace pico {
 
-class Buffer : public QWidget, public PicoObject
+class Buffer : public QWidget
 {
     Q_OBJECT
 

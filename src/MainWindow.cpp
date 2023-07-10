@@ -3,6 +3,7 @@
 
 #include <QGuiApplication>
 #include <QScreen>
+#include <qnamespace.h>
 
 namespace pico {
 
