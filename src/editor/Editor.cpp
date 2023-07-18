@@ -3,10 +3,18 @@
 #include <QStackedLayout>
 #include <QTextEdit>
 #include <QTreeView>
+#include <qnamespace.h>
 
 #include "MainWindow.hpp"
 #include "editor/TextEdit.hpp"
+#include "extern/qlightterminal.h"
 #include "util/Util.hpp"
+
+/* for quick and short callbacks */
+#define CALLBACK(X)                                                                               \
+    ([=]() {                                                                                      \
+        X;                                                                                        \
+    })
 
 namespace pico {
 
@@ -24,7 +32,7 @@ Editor::getInstance(QMainWindow *parent)
 void
 Editor::forwardKeyFilter(QObject *obj)
 {
-    obj->installEventFilter(this->m_keyFilter);
+    obj->installEventFilter(m_keyFilter);
 }
 
 bool
@@ -71,9 +79,9 @@ Editor::currentBuffer(void)
 }
 
 void
-Editor::addBuffer(void)
+Editor::addBuffer(QWidget *widget)
 {
-    m_stack->addWidget(new Buffer(this));
+    m_stack->addWidget(new Buffer(widget, this));
 }
 
 void
@@ -121,16 +129,21 @@ Editor::Init(void)
 
     using namespace Qt;
     installEventFilter(m_keyFilter);
-    m_stack->addWidget(new Buffer(this));
+    addBuffer(new TextEdit(this));
 
-    addBinding({ CTRL | Key_B }, Mode::Normal, [=]() {
-        prevBuffer();
-    });
-    addBinding({ CTRL | Key_N }, Mode::Normal, [=]() {
-        nextBuffer();
-    });
+    addBinding({ CTRL | Key_B }, Mode::Normal, CALLBACK(prevBuffer()));
+    addBinding({ CTRL | Key_N }, Mode::Normal, CALLBACK(nextBuffer()));
+    addBinding({ CTRL | Key_B }, Mode::Terminal, CALLBACK(prevBuffer()));
+    addBinding({ CTRL | Key_N }, Mode::Terminal, CALLBACK(nextBuffer()));
+
     addBinding({ Key_Space, Key_B, Key_N }, Mode::Normal, [=]() {
-        addBuffer();
+        addBuffer(new TextEdit(this));
+    });
+    addBinding({ CTRL | Key_Backslash }, Mode::Normal, [=]() {
+        currentBuffer()->toggleTerminal();
+    });
+    addBinding({ CTRL | Key_Backslash }, Mode::Terminal, [=]() {
+        currentBuffer()->toggleTerminal();
     });
     addBinding({ Key_Space, Key_V }, Mode::Normal, [=]() {
         currentBuffer()->splitLeft(new TextEdit(this));

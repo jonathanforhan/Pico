@@ -15,6 +15,7 @@
 #include <QTimer>
 #include <QWidget>
 
+#include "editor/PicoWidget.hpp"
 #include "st.h"
 
 typedef struct {
@@ -40,7 +41,7 @@ typedef struct {
     int hPadding;
 } Window;
 
-class QLightTerminal : public QWidget
+class QLightTerminal : public QWidget, public pico::PicoWidget
 {
     Q_OBJECT
 
@@ -88,6 +89,9 @@ protected:
 
     void
     wheelEvent(QWheelEvent *event) override;
+
+    void
+    focusInEvent(QFocusEvent *event) override;
 
     void
     focusOutEvent(QFocusEvent *event) override;

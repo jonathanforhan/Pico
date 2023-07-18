@@ -15,11 +15,13 @@
 #include <QPoint>
 #include <QPointF>
 #include <QTextCursor>
+#include <qnamespace.h>
 
 #include "editor/Editor.hpp"
 
 QLightTerminal::QLightTerminal(QWidget *parent)
     : QWidget(parent),
+      pico::PicoWidget(this),
       scrollbar(Qt::Orientation::Vertical),
       boxLayout(this),
       cursorTimer(this),
@@ -27,12 +29,12 @@ QLightTerminal::QLightTerminal(QWidget *parent)
       win{ 0, 0, 0, 0, 100, 10, 10, 1.25, 10, 8.42, 0, 8 }
 {
     // set up terminal
-    st = new SimpleTerminal();
+    st = new SimpleTerminal(this);
 
     // setup default style
     // Note: font size is not reliable use win.charWidth for length computation
     setAttribute(Qt::WA_StyledBackground, true);
-    this->setFontSize(10, 500);
+    this->setFontSize(pico::Editor::getInstance()->fontInfo().pointSize(), 500);
     this->updateStyleSheet();
 
     // set up scrollbar
@@ -46,10 +48,10 @@ QLightTerminal::QLightTerminal(QWidget *parent)
     win.viewPortHeight = win.height / win.lineheight;
     setupScrollbar();
 
-    connect(st, &SimpleTerminal::s_error, this, [this](QString error) {
+    connect(st, &SimpleTerminal::sendError, this, [this](QString error) {
         emit s_error("Error from st: " + error);
     });
-    connect(st, &SimpleTerminal::s_updateView, this, &QLightTerminal::updateTerminal);
+    connect(st, &SimpleTerminal::sendUpdateView, this, &QLightTerminal::updateTerminal);
 
     // set up blinking cursor
     connect(&cursorTimer, &QTimer::timeout, this, [this]() {
@@ -67,7 +69,9 @@ QLightTerminal::QLightTerminal(QWidget *parent)
     connect(&resizeTimer, &QTimer::timeout, this, &QLightTerminal::resize);
 
     // connect close event of the tty
-    connect(st, &SimpleTerminal::s_closed, this, &QLightTerminal::close);
+    connect(st, &SimpleTerminal::sendClosed, this, &QLightTerminal::close);
+
+    setMinimumSize(400, 400);
 }
 
 void
@@ -86,7 +90,7 @@ QLightTerminal::close()
 }
 
 void
-QLightTerminal::updateTerminal(Term *term)
+QLightTerminal::updateTerminal(Term *)
 {
     cursorVisible = true;
     cursorTimer.start(750);
@@ -105,14 +109,14 @@ QLightTerminal::updateTerminal(Term *term)
 }
 
 void
-QLightTerminal::scrollX(int n)
+QLightTerminal::scrollX(int)
 {
     int scroll = (st->term.scr - (scrollbar.maximum() - scrollbar.value()) / win.scrollMultiplier);
 
     if (scroll < 0) {
-        st->kscrollup(-scroll);
+        st->kScrollUp(-scroll);
     } else {
-        st->kscrolldown(scroll);
+        st->kScrollDown(scroll);
     }
     update();
 }
@@ -369,9 +373,9 @@ QLightTerminal::keyPressEvent(QKeyEvent *e)
 
     if (key == Qt::Key_Backspace) {
         if (mods.testFlag(Qt::KeyboardModifier::AltModifier)) {
-            st->ttywrite("\033\177", 2, 1);
+            st->ttyWrite("\033\177", 2, 1);
         } else {
-            st->ttywrite("\177", 1, 1);
+            st->ttyWrite("\177", 1, 1);
         }
         return;
     }
@@ -382,7 +386,7 @@ QLightTerminal::keyPressEvent(QKeyEvent *e)
         QClipboard *clipboard = QGuiApplication::clipboard();
         QString clippedText = clipboard->text();
         QByteArray data = clippedText.toLocal8Bit();
-        st->ttywrite(data.data(), data.size(), 1);
+        st->ttyWrite(data.data(), data.size(), 1);
         return;
     }
 
@@ -390,7 +394,7 @@ QLightTerminal::keyPressEvent(QKeyEvent *e)
     if (key == 67 && mods & Qt::KeyboardModifier::ShiftModifier &&
         mods & Qt::KeyboardModifier::ControlModifier) {
         QClipboard *clipboard = QGuiApplication::clipboard();
-        QString clippedText = QString(st->getsel());
+        QString clippedText = QString(st->getSelection());
         clipboard->setText(clippedText);
         return;
     }
@@ -403,7 +407,7 @@ QLightTerminal::keyPressEvent(QKeyEvent *e)
         } else {
             text = e->text().toUtf8();
         }
-        st->ttywrite(text, text.size(), 1);
+        st->ttyWrite(text, text.size(), 1);
     } else {
         // special keys
         // TODO: Add more short cuts
@@ -418,7 +422,7 @@ QLightTerminal::keyPressEvent(QKeyEvent *e)
             if (key == keys[i].key) {
                 for (int j = i; j < i + nextKey; j++) {
                     if (mods.testFlag(keys[j].mods)) {
-                        st->ttywrite(keys[j].cmd, keys[j].cmd_size, 1);
+                        st->ttyWrite(keys[j].cmd, keys[j].cmd_size, 1);
                         return;
                     }
                 }
@@ -436,7 +440,7 @@ QLightTerminal::mousePressEvent(QMouseEvent *event)
     lastMousePos = event->pos();
 
     // reset old selection
-    st->selclear();
+    st->selectionClear();
     update();
 
     // select line if tripple click
@@ -446,7 +450,7 @@ QLightTerminal::mousePressEvent(QMouseEvent *event)
         int col = (pos.x() - win.hPadding) / win.charWith;
         int row = (pos.y() - win.vPadding) / win.lineheight;
 
-        st->selstart(col, row, SNAP_LINE);
+        st->selectionStart(col, row, SNAP_LINE);
     }
 
     // draw cursor
@@ -469,7 +473,7 @@ QLightTerminal::mouseReleaseEvent(QMouseEvent *event)
         col = MIN(col, win.viewPortWidth - 1);
         row = MIN(row, win.viewPortHeight - 1);
 
-        st->selextend(col, row, SEL_REGULAR, 1);
+        st->selectionExtEnd(col, row, SEL_REGULAR, 1);
         selectionStarted = false;
         selectionTimer.stop();
         update();
@@ -492,7 +496,7 @@ QLightTerminal::mouseMoveEvent(QMouseEvent *event)
                 return;
             }
 
-            st->selstart(col, row, 0);
+            st->selectionStart(col, row, 0);
             selectionTimer.start(100);
             selectionStarted = true;
         }
@@ -500,7 +504,7 @@ QLightTerminal::mouseMoveEvent(QMouseEvent *event)
 }
 
 bool
-QLightTerminal::focusNextPrevChild(bool next)
+QLightTerminal::focusNextPrevChild(bool)
 {
     // disabled to allow the terminal to consume tab key presses
     return false;
@@ -539,7 +543,7 @@ QLightTerminal::updateSelection()
         col = MIN(col, win.viewPortWidth - 1);
         row = MIN(row, win.viewPortHeight - 1);
 
-        st->selextend(col, row, SEL_REGULAR, 0);
+        st->selectionExtEnd(col, row, SEL_REGULAR, 0);
         update();
     }
 }
@@ -559,8 +563,8 @@ QLightTerminal::mouseDoubleClickEvent(QMouseEvent *event)
         return;
     }
 
-    st->selclear();
-    st->selstart(col, row, SNAP_WORD);
+    st->selectionClear();
+    st->selectionStart(col, row, SNAP_WORD);
 
     lastClick = QDateTime::currentMSecsSinceEpoch();
 
@@ -606,8 +610,8 @@ QLightTerminal::resize()
     win.viewPortWidth = cols;
     win.viewPortHeight = rows;
 
-    st->tresize(cols, win.viewPortHeight);
-    st->ttyresize(cols * 8.5, win.viewPortHeight * win.lineheight);
+    st->termResize(cols, win.viewPortHeight);
+    st->ttyResize(cols * 8.5, win.viewPortHeight * win.lineheight);
 }
 
 void
@@ -631,8 +635,16 @@ QLightTerminal::wheelEvent(QWheelEvent *event)
 }
 
 void
-QLightTerminal::focusOutEvent(QFocusEvent *event)
+QLightTerminal::focusInEvent(QFocusEvent *event)
 {
+    pico::Editor::getInstance()->setMode(pico::Mode::Terminal);
+    QWidget::focusInEvent(event);
+}
+
+void
+QLightTerminal::focusOutEvent(QFocusEvent *)
+{
+    pico::Editor::getInstance()->setMode(pico::Mode::Normal);
     cursorTimer.stop();
     cursorVisible = false;
     // redraw cursor position

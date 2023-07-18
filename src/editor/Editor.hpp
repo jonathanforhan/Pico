@@ -47,7 +47,7 @@ public: /* functions */
     currentBuffer(void);
 
     void
-    addBuffer(void);
+    addBuffer(QWidget *widget);
 
     void
     nextBuffer(void);

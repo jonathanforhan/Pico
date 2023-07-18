@@ -29,9 +29,7 @@ AlignConsecutiveMacros:
   PadOperators: false
 AlignEscapedNewlines: Right
 AlignOperands: Align
-AlignTrailingComments:
-  Kind: Always
-  OverEmptyLines: 0
+AlignTrailingComments: Always
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: Never
@@ -128,11 +126,8 @@ InsertNewlineAtEOF: false
 InsertTrailingCommas: None
 IntegerLiteralSeparator:
   Binary: 0
-  BinaryMinDigits: 0
   Decimal: 0
-  DecimalMinDigits: 0
   Hex: 0
-  HexMinDigits: 0
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
 KeepEmptyLinesAtTheStartOfBlocks: true

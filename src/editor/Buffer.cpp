@@ -5,23 +5,22 @@
 
 namespace pico {
 
-Buffer::Buffer(QWidget *parent)
+Buffer::Buffer(QWidget *widget, QWidget *parent)
     : QWidget(parent),
       m_layout(new QHBoxLayout(this)),
       m_splitter(new QSplitter(this)),
-      m_fileTree(new FileTree(m_splitter))
+      m_fileTree(new FileTree(m_splitter)),
+      m_terminal(new QLightTerminal(m_splitter))
 {
+    m_fileTree->hide();
+    m_terminal->hide();
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_splitter);
     m_splitter->setHandleWidth(0);
 
-    auto *textEdit = new TextEdit(this);
-    m_splitter->addWidget(textEdit);
-    textEdit->setFocus();
+    m_splitter->addWidget(widget);
 
-    m_fileTree->setFont(parent->font());
-    textEdit->setFont(parent->font());
     connect(m_fileTree, &FileTree::clicked, [=]() {
 
     });
@@ -75,7 +74,7 @@ Buffer::splitRight(QWidget *widget)
 }
 
 void
-Buffer::splitTop(QWidget *widget)
+Buffer::splitTop(QWidget *)
 {
     // TODO
     throw;
@@ -148,6 +147,30 @@ Buffer::toggleFileTree(void)
         m_fileTree->setFocus();
     } else {
         hideFileTree();
+    }
+}
+
+void
+Buffer::showTerminal(void)
+{
+    m_terminal->show();
+    m_terminal->setFocus();
+}
+
+void
+Buffer::hideTerminal(void)
+{
+    m_terminal->hide();
+}
+
+void
+Buffer::toggleTerminal(void)
+{
+    if (m_terminal->isHidden()) {
+        showTerminal();
+        m_terminal->setFocus();
+    } else {
+        hideTerminal();
     }
 }
 

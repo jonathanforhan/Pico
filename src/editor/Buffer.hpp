@@ -1,5 +1,6 @@
 #pragma once
 
+#include "extern/qlightterminal.h"
 #include <QBoxLayout>
 #include <QSplitter>
 #include <QTreeView>
@@ -14,7 +15,7 @@ class Buffer : public QWidget
     Q_OBJECT
 
 public:
-    explicit Buffer(QWidget *parent = nullptr);
+    explicit Buffer(QWidget *widget, QWidget *parent = nullptr);
 
     QSplitter *
     splitter();
@@ -46,10 +47,20 @@ public:
     void
     toggleFileTree(void);
 
+    void
+    showTerminal(void);
+
+    void
+    hideTerminal(void);
+
+    void
+    toggleTerminal(void);
+
 private:
     QBoxLayout *m_layout;
     QSplitter *m_splitter;
     QTreeView *m_fileTree;
+    QLightTerminal *m_terminal;
 };
 
 } // namespace pico
